@@ -157,6 +157,8 @@ if __name__ == "__main__":
         logger.info("#########################")
         logger.info(".....Exiting program.....")
         logger.info("#########################")
+        # Following exception is just to inform me that the program has ended
+        logger.exception("Program has exited")
         print("#### Exiting Program ####", file=sys.stderr)
     
     
