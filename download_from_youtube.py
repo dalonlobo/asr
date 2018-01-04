@@ -103,15 +103,17 @@ def download_all_videos(destpath, df_to_download):
     """
     try:
         videopath = os.path.join(destpath)
+        count = 0
         for youtube_link in df_to_download.Link:
             logger.info("Processing the link: " + youtube_link)
             (allvideolinks, allvideoids) = _get_videoids_from_playlists(youtube_link)
             
             if allvideolinks == None:
                 continue
-    
+            count += len(allvideolinks)
             download_videos(videopath, allvideoids)
         print("Successfully downloaded all the videos", file=sys.stderr)
+        logger.info("Successfully downloaded {} videos".format(count))
         return True
     except Exception as e:
         logger.exception(e)
