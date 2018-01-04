@@ -5,138 +5,108 @@ Created on Wed Jan  3 15:06:43 2018
 
 @author: dalonlobo
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, \
+                        print_function, unicode_literals
 
 import os
+import sys
 import argparse
-import youtube_dl
 import logging
-import progressbar
 
 import pandas as pd
 
-def _get_videoid_from_URL(youtube_link):
-    " Returns the video id"
-    # https://www.youtube.com/watch?v=UzxYlbK2c7E
-
-    if '?v=' not in youtube_link:
-        return None
-    index = youtube_link.find('?v=')
-    return youtube_link[index + 3:]
-
-def _get_videoids_from_playlists(youtube_link):
-    """
-    Youtube link can be a playlist. This will return all the videoids,
-    from that playlist
-    """
-    # Options for youtube-dl
-    # https://github.com/rg3/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312
-    ydl_opts = {'outtmpl': '%(id)s%(ext)s'}
-    ydl = youtube_dl.YoutubeDL(ydl_opts)
+from timeit import default_timer as timer
+from utils import run_command, convert_mp4_to_audio
+from download_from_youtube import download_all_videos
+from split_video_on_srt_time import split_video_on_srt_time
     
-    with ydl:
-        result = ydl.extract_info(
-            youtube_link,
-            download=False # We just want to extract the info
-        )    
-        
-    allVideoLinks = []
-    allVideoIDs = []
-    # Return none if there are no videos
-    if result == None:
-        return (None, None)
-    
-    if 'entries' in result:
-        videoentries = result['entries']
-        print('length of video object is : ', len(videoentries))
-
-        for eachentry in videoentries:
-            if eachentry == None:
-                continue
-
-            videolink = eachentry['webpage_url']
-            print('Entry is : ', videolink)
-            allVideoLinks.append(videolink)
-            videoid = _get_videoid_from_URL(videolink)
-            allVideoIDs.append(videoid)
-    else:
-        videoentry = result
-        videolink = videoentry['webpage_url']
-        allVideoLinks.append(videolink)
-        videoid = _get_videoid_from_URL(videolink)
-        allVideoIDs.append(videoid)
-
-    return (allVideoLinks, allVideoIDs)
-
-def run_command(cmd):
-    try:
-        os.system(cmd)
-    except Exception as e:
-        logging.exception(e)
-        print('exception caught ', str(e))
-
-def download_videos(destpath, allvideoids):
-    for index, videoid in enumerate(allvideoids):
-        op_path = os.path.join(destpath, videoid)
-        if not os.path.exists(op_path):
-            os.makedirs(op_path)
-
-        cmd = 'youtube-dl' + " -o '" + os.path.join(op_path, videoid) +\
-                ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
-                "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
-                "https://www.youtube.com/watch?v=" + videoid
-        print('Built cmd: ', cmd)
-        run_command(cmd)
-        print('Download complete')
-
-
-
-def _download_all_videos(destpath, df_to_download):
-    """
-    This will download all the videos which have trancriptions
-    into the destination path
-    """
-    for youtube_link in df_to_download.Link:
-        logging.info("Processing the link: " + youtube_link)
-        (allvideolinks, allvideoids) = _get_videoids_from_playlists(youtube_link)
-        
-        if allvideolinks == None:
-            continue
-
-        download_videos(destpath, allvideoids)
-
 if __name__ == "__main__":
+    """
+    This script will download Sadguru videos, and preprocess them,
+    3 folders will be created, train, dev and test, which will have the csv and 
+    wav chunks
+    """
     logs_path = os.path.basename(__file__) + ".logs"
     logging.basicConfig(filename=logs_path,
         filemode='a',
         format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
         datefmt='%H:%M:%S',
         level=logging.DEBUG)
-    parser = argparse.ArgumentParser(description="""
-                                     This script will import sadguru videos and preprocess them, 
-                                     so that you can train deepspeech model""")
-    parser.add_argument('--vidlist', type=str,  
-                        help='Path to the excel file containing list of videos to download')
-    parser.add_argument('--destpath', type=str,  
-                        help='Path to store the video files')
-    args = parser.parse_args(["--vidlist", "SADHGuru Channel Videos.xlsx", "--destpath", "tmp"])
-    # Path to the destination folder, where videos will be saved 
-    destpath = os.path.abspath(args.destpath)
-    # path to excel  file containing the list of videos to download
-    vidlist = os.path.abspath(args.vidlist)
-    
-    # Create the destination folder if it does not exist
-    if not os.path.exists(destpath):
-        os.makedirs(destpath)
-        
-    # Read the videos list from excel file
-    # Columns are VideoID,	Link, 	Transcribed
-    df_to_download = pd.read_excel(vidlist)
-    
-    # Retain only the videos which have transcription
-    df_to_download = df_to_download[df_to_download.Transcribed == 1]
-    
-    _download_all_videos(destpath, df_to_download)
+    print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
+    print("Run the following command to view logs:", file=sys.stderr)
+    print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
+    try:
+        logging.info("#########################")
+        logging.info("....Starting program.....")
+        logging.info("#########################")
+        process_start_time = timer()
+        parser = argparse.ArgumentParser(description="""
+                                         This script will import sadguru videos and preprocess them, 
+                                         so that you can train deepspeech model""")
+        parser.add_argument('--vidlist', type=str,  
+                            help='Path to the excel file containing list of videos to download')
+        parser.add_argument('--destpath', type=str,  
+                            help='Path to store the video files')
+        parser.add_argument('--checkpoint_dir', type=str,  
+                            help='Path to checkpoint direcotry')
+        args = parser.parse_args(["--vidlist", "SADHGuru Channel Videos.xlsx",
+                                  "--checkpoint_dir", "tmp/checkpoint",
+                                  "--destpath", "tmp"])
+        # Path to the checkpoint directory
+        checkpoint_dir = args.checkpoint_dir
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
+        checkpoint_dir = os.path.abspath(checkpoint_dir)
+        # Path to the destination folder, where videos will be saved 
+        destpath = os.path.abspath(args.destpath)
+        # path to excel  file containing the list of videos to download
+        vidlist = os.path.abspath(args.vidlist)   
+        # Videos will be stored here
+        videospath = os.path.join(os.path.abspath(args.destpath), "Videos")
+        # Create the destination folder if it does not exist
+        if not os.path.exists(videospath):
+            logging.info("Creating the directory: " + videospath)
+            os.makedirs(videospath)
+        else:
+            print("Videos directory already exists", file=sys.stderr)
+            try:
+               input = raw_input # Py 2 and 3 compatibility
+            except NameError:
+               pass
+            user_input = input("Do you want to continue? y or n\n")
+            if user_input != "y":
+                sys.exit(0)
+                
+        # Read the videos list from excel file
+        # Columns are VideoID,	Link, 	Transcribed
+        df_to_download = pd.read_excel(vidlist)    
+        # Retain only the videos which have transcription
+        df_to_download = df_to_download[df_to_download.Transcribed == 1]
+        logging.debug("List of videos that will be downloaded: ")
+        logging.debug(df_to_download.Link)
+        logging.info("Saving the videos to: " + videospath)
+        # Download all the videos in the list to the destination folder
+        flag = download_all_videos(videospath, df_to_download)
+        if not flag:
+            logging.error("Download the videos again, something went wrong!")
+            print("Download the videos again, something went wrong!", file=sys.stderr)
+            sys.exit(-1)
+        # Splitting the videos 
+        for dirs in os.listdir(videospath):
+            directory = os.path.join(videospath, dirs)
+            logging.info("Splitting the video in following directory:")
+            logging.info(directory)
+            split_video_on_srt_time(videospath, checkpoint_dir, directory, dirs)
+        print("All the videos are converted to audio and split successfully", file=sys.stderr)
+        logging.info('Entire program ran in {} minutes'.format((timer() - process_start_time) / 60))
+    except SystemExit as e:
+        print("System exit command issued with code: " + str(e), file=sys.stderr)
+        logging.error("System exit command issued with code: " + str(e))
+    finally:
+        logging.info("#########################")
+        logging.info(".....Exiting program.....")
+        logging.info("#########################")
+        print("#### Exiting Program ####", file=sys.stderr)
     
     
     
