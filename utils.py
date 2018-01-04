@@ -23,7 +23,7 @@ def convert_mp4_to_audio(fpath_in, fpath_out):
     return cmd
 
 def run_command(command):
-    logging.debug("Executing: " + command[:30] + "...")
+    logging.debug("Executing: " + command)
     p = subprocess.Popen(command, bufsize=2048, shell=True, 
                          stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE, 

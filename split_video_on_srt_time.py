@@ -24,10 +24,15 @@ from pydub.effects import normalize
 from pydub.silence import split_on_silence
 
 def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
-    # Path to the mp4 file
-    mp4_fpath = glob.glob(directory + "/*.mp4")[0]
-    # Path to the srt file
-    srt_fpath = glob.glob(directory + "/*.srt")[0]
+    try:
+        # Path to the mp4 file
+        mp4_fpath = glob.glob(directory + "/*.mp4")[0]
+        # Path to the srt file
+        srt_fpath = glob.glob(directory + "/*.srt")[0]
+    except IndexError as e:
+        logging.exception(e)
+        logging.error("Either mp4 or srt file is missing for " + videoid)
+        return
     # Path to wav file
     output_wav_path = os.path.join(directory, videoid + ".wav")
     logging.debug("Different paths are:")
@@ -61,6 +66,10 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
         segment = audio_segments[start_in_ms:end_in_ms]
         # Path to the audio segment
         segment_path = os.path.join(samples_path, "sample_{}.wav".format(str(index).zfill(10)))
+        # check if the segment is greater than 5s
+        duration = end_in_ms - start_in_ms
+        if duration > 5000:
+            logging.error("Segment {} is greater than 5s, its {}ms long".format(segment_path, duration))
         # Export as wav
         segment.export(segment_path, format="wav") 
         # Format to save to csv
@@ -78,6 +87,7 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
     logging.info("Saving the data to: "+os.path.join(basedirectory, videoid + "_data.csv"))
     df.to_csv(os.path.join(basedirectory, videoid + "_data.csv"), index=False)
     logging.info("Processing of video {} done".format(videoid))
+    return True
     
     
         
