@@ -18,6 +18,8 @@ import pandas as pd
 
 from utils import run_command
 
+logger = logging.getLogger()
+
 def _get_videoid_from_URL(youtube_link):
     " Returns the video id"
     # https://www.youtube.com/watch?v=UzxYlbK2c7E
@@ -85,9 +87,9 @@ def download_videos(destpath, allvideoids):
                 ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
                 "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
                 "https://www.youtube.com/watch?v=" + videoid
-        logging.debug('Built cmd: ' + cmd)
+        logger.debug('Built cmd: ' + cmd)
         run_command(cmd)
-        logging.info('Video {} downloaded successfully'.format(videoid))
+        logger.info('Video {} downloaded successfully'.format(videoid))
 
 
 
@@ -102,7 +104,7 @@ def download_all_videos(destpath, df_to_download):
     try:
         videopath = os.path.join(destpath)
         for youtube_link in df_to_download.Link:
-            logging.info("Processing the link: " + youtube_link)
+            logger.info("Processing the link: " + youtube_link)
             (allvideolinks, allvideoids) = _get_videoids_from_playlists(youtube_link)
             
             if allvideolinks == None:
@@ -112,7 +114,7 @@ def download_all_videos(destpath, df_to_download):
         print("Successfully downloaded all the videos", file=sys.stderr)
         return True
     except Exception as e:
-        logging.exception(e)
+        logger.exception(e)
         return False
 
 if __name__ == "__main__":
@@ -126,6 +128,7 @@ if __name__ == "__main__":
         format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
         datefmt='%H:%M:%S',
         level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
     print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
     print("Run the following command to view logs:\n", file=sys.stderr)
     print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
@@ -141,19 +144,19 @@ if __name__ == "__main__":
     vidlist = os.path.abspath(args.vidlist)    
     # Create the destination folder if it does not exist
     if not os.path.exists(destpath):
-        logging.info("Creating the directory: " + destpath)
+        logger.info("Creating the directory: " + destpath)
         os.makedirs(destpath)
         
     # Read the videos list from excel file
     # Columns are VideoID,	Link, 	Transcribed
     df_to_download = pd.read_excel(vidlist)
-    logging.debug("List of videos that will be downloaded: \n")
-    logging.debug(df_to_download.Link)
+    logger.debug("List of videos that will be downloaded: \n")
+    logger.debug(df_to_download.Link)
     # Download all the videos in the list to the destination folder
     download_all_videos(destpath, df_to_download)
-    logging.info("All videos downloaded successfully")
+    logger.info("All videos downloaded successfully")
     print("All videos downloaded successfully", file=sys.stderr)
-    logging.info("#########################")
-    logging.info(".....Exiting program.....")
-    logging.info("#########################")
+    logger.info("#########################")
+    logger.info(".....Exiting program.....")
+    logger.info("#########################")
     print(".....Exiting program.....", file=sys.stderr)
