@@ -23,7 +23,7 @@ from pydub import AudioSegment
 from pydub.effects import normalize
 from pydub.silence import split_on_silence
 
-logger = logging.getLogger()
+logger = logging.getLogger("__main__")
 
 def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
     try:
@@ -55,7 +55,7 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
     # Read the srt file
     subtitles = pysrt.open(srt_fpath)
     # Buffer in milliseconds to append to start and end of each segment
-    BUFFER_IN_MS = 200
+    BUFFER_IN_MS = 250
     # Entire list of tuple Path_to_wav,size,transcript
     data_to_df = []
     for index, subtitle in enumerate(subtitles):
@@ -71,7 +71,7 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
         # check if the segment is greater than 5s
         duration = end_in_ms - start_in_ms
         if duration > 5000:
-            logger.error("Segment {} is greater than 5s, its {}ms long".format(segment_path, duration))
+            logger.info("Segment {} is greater than 5s, its {}ms long".format(segment_path, duration))
         # Export as wav
         segment.export(segment_path, format="wav") 
         # Format to save to csv

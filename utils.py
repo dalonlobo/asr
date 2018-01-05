@@ -15,8 +15,9 @@ import subprocess
 import re
 import numpy as np
 import pandas as pd
+import pysrt
 
-logger = logging.getLogger()
+logger = logging.getLogger("__main__")
         
 def convert_mp4_to_audio(fpath_in, fpath_out):
     """Convert to wav format with 1 channel and 16Khz freq"""
@@ -59,3 +60,37 @@ def train_validate_test_split(df, train_percent=.6, validate_percent=.2, seed=No
     validate = df.iloc[perm[train_end:validate_end]]
     test = df.iloc[perm[validate_end:]]
     return train, validate, test
+
+def clean_srt_min_duration(srt_file, DURATION=1000):
+    """
+    This will merge the subtitles which are less than DURATION,
+    DURATION should be in milliseconds
+    """
+    subs = pysrt.open(srt_file)
+    indexes_to_delete = []
+    for index, sub in enumerate(subs[:-1]):
+        duration = sub.duration
+        # convert duration to seconds
+        if duration.seconds * 1000 + duration.milliseconds < DURATION:
+            logger.debug("Duration is less than 1s: "+ str(duration.seconds * 1000 + duration.milliseconds))
+            # Check the next sub duration and append it to that
+            # If the next duration is greater than 5s, don't do anything
+            next_duration = subs[index + 1].duration
+            if next_duration.seconds * 1000 + next_duration.milliseconds >= 5000:
+                continue
+            sub.text += " " + subs[index + 1].text
+            sub.end = subs[index + 1].end # extend this subtitle
+            indexes_to_delete.append(index + 1)
+    logger.debug("Indexes to delete: ")
+    logger.debug(indexes_to_delete)
+    subs = [sub for index, sub in enumerate(subs) if index not in  indexes_to_delete]
+    subs = pysrt.srtfile.SubRipFile(subs) # Convert the list to srt
+    subs.clean_indexes() # cleanup the indexes
+    subs.save(srt_file) # Save to same srt file
+            
+    
+    
+    
+    
+    
+    

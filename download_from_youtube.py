@@ -18,7 +18,7 @@ import pandas as pd
 
 from utils import run_command
 
-logger = logging.getLogger()
+logger = logging.getLogger("__main__")
 
 def _get_videoid_from_URL(youtube_link):
     " Returns the video id"
