@@ -6,14 +6,14 @@ if [ ! -f DeepSpeech.py ]; then
 fi;
 
 python -u DeepSpeech.py \
-  --train_files /home/nvidia/DeepSpeech/data/alfred/train/train.csv \
-  --dev_files /home/nvidia/DeepSpeech/data/alfred/dev/dev.csv \
-  --test_files /home/nvidia/DeepSpeech/data/alfred/test/test.csv \
+  --train_files /datadrive/speechexperiments/datasets/video_datasets/sadguru-other-train.csv \
+  --dev_files /datadrive/speechexperiments/datasets/video_datasets/sadguru-other-dev.csv \
+  --test_files /datadrive/speechexperiments/datasets/video_datasets/sadguru-other-test.csv \
   --train_batch_size 80 \
   --dev_batch_size 80 \
   --test_batch_size 40 \
   --n_hidden 375 \
-  --epoch 33 \
+  --epoch 50 \
   --validation_step 1 \
   --early_stop True \
   --earlystop_nsteps 6 \
@@ -23,10 +23,10 @@ python -u DeepSpeech.py \
   --learning_rate 0.00095 \
   --report_count 100 \
   --use_seq_length False \
-  --export_dir /home/nvidia/DeepSpeech/data/alfred/results/model_export/ \
-  --checkpoint_dir /home/nvidia/DeepSpeech/data/alfred/results/checkout/ \
-  --decoder_library_path /home/nvidia/tensorflow/bazel-bin/native_client/libctc_decoder_with_kenlm.so \
-  --alphabet_config_path /home/nvidia/DeepSpeech/data/alfred/vocabulary.txt \
-  --lm_binary_path /home/nvidia/DeepSpeech/data/alfred/lm.binary \
-  --lm_trie_path /home/nvidia/DeepSpeech/data/alfred/trie \
+  --export_dir /datadrive/speechexperiments/datasets/video_datasets/model_export/ \
+  --checkpoint_dir /datadrive/speechexperiments/datasets/video_datasets/checkpoint/ \
+  --decoder_library_path /datadrive/speechexperiments/DeepSpeech/native_client/libctc_decoder_with_kenlm.so \
+#  --alphabet_config_path /datadrive/speechexperiments/datasets/lm_models/vocabulary.txt \
+#  --lm_binary_path /home/nvidia/DeepSpeech/data/alfred/lm.binary \
+#  --lm_trie_path /home/nvidia/DeepSpeech/data/alfred/trie \
   "$@"
