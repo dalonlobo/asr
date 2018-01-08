@@ -26,7 +26,7 @@ python -u DeepSpeech.py \
   --export_dir /datadrive/speechexperiments/datasets/video_datasets/model_export/ \
   --checkpoint_dir /datadrive/speechexperiments/datasets/video_datasets/checkpoint/ \
   --decoder_library_path /datadrive/speechexperiments/DeepSpeech/native_client/libctc_decoder_with_kenlm.so \
-#  --alphabet_config_path /datadrive/speechexperiments/datasets/lm_models/vocabulary.txt \
-#  --lm_binary_path /home/nvidia/DeepSpeech/data/alfred/lm.binary \
-#  --lm_trie_path /home/nvidia/DeepSpeech/data/alfred/trie \
+  --alphabet_config_path /datadrive/speechexperiments/models/alphabet.txt \
+  --lm_binary_path /datadrive/speechexperiments/datasets/lm_models/ds_full_lm_o5.binary \
+  --lm_trie_path /datadrive/speechexperiments/datasets/lm_models/ds_full_lm_trie \
   "$@"
