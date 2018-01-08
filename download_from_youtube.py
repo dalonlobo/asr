@@ -17,6 +17,7 @@ import logging
 import pandas as pd
 
 from utils import run_command
+from youtube_dl.utils import DownloadError
 
 logger = logging.getLogger("__main__")
 
@@ -78,18 +79,24 @@ def download_videos(destpath, allvideoids):
     Downloads all the videos in the allvideosids list to the
     destination directory.
     """
-    for index, videoid in enumerate(allvideoids):
-        op_path = os.path.join(destpath, videoid)
-        if not os.path.exists(op_path):
-            os.makedirs(op_path)
+    try:
+        for index, videoid in enumerate(allvideoids):
+            op_path = os.path.join(destpath, videoid)
+            if not os.path.exists(op_path):
+                os.makedirs(op_path)
 
-        cmd = 'youtube-dl' + " -o '" + os.path.join(op_path, videoid) +\
-                ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
-                "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
-                "https://www.youtube.com/watch?v=" + videoid
-        logger.debug('Built cmd: ' + cmd)
-        run_command(cmd)
-        logger.info('Video {} downloaded successfully'.format(videoid))
+            cmd = 'youtube-dl' + " -o '" + os.path.join(op_path, videoid) +\
+                    ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
+                    "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
+                    "https://www.youtube.com/watch?v=" + videoid
+            logger.debug('Built cmd: ' + cmd)
+            run_command(cmd)
+            logger.info('Video {} downloaded successfully'.format(videoid))
+    except DownloadError as e:
+        logger.exception(e)
+        logger.error("Could not download the following videos:")
+        logger.error(allvideoids)
+        pass
 
 
 
