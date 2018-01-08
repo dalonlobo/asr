@@ -92,7 +92,7 @@ if __name__ == "__main__":
                input = raw_input # Py 2 and 3 compatibility
             except NameError:
                pass
-            if args.stop == "y"
+            if args.stop == "y":
                 user_input = input("Do you want to continue? y or n\n")
                 if user_input != "y":
                     sys.exit(0)
