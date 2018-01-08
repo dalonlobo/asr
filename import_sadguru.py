@@ -64,7 +64,9 @@ if __name__ == "__main__":
         parser.add_argument('--destpath', '-d', type=str, default='tmp',  
                             help='Path to store the video files')
         parser.add_argument('--checkpoint_dir', '-c', type=str, default='checkpoint', 
-                            help='Path to checkpoint direcotry')
+                            help='Path to checkpoint directory')
+        parser.add_argument('--stop', '-n', type=str, default='n', 
+                            help="Don't stop if video directory exists (y or n)")
 #        args = parser.parse_args(["--vidlist", "SADHGuru Channel Videos tmp.xlsx",
 #                                  "--checkpoint_dir", "tmp/checkpoint",
 #                                  "--destpath", "tmp"])
@@ -90,9 +92,10 @@ if __name__ == "__main__":
                input = raw_input # Py 2 and 3 compatibility
             except NameError:
                pass
-            user_input = input("Do you want to continue? y or n\n")
-            if user_input != "y":
-                sys.exit(0)
+            if args.stop == "y"
+                user_input = input("Do you want to continue? y or n\n")
+                if user_input != "y":
+                    sys.exit(0)
                 
         # Read the videos list from excel file
         # Columns are VideoID,	Link, 	Transcribed
