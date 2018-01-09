@@ -48,6 +48,8 @@ def pre_process_srt(text):
     text = re.sub(r"\([^)]*\)", '' , text)
     # Remove special characters
     text = re.sub('[^A-Za-z0-9\s\']+', ' ', text)
+    # Remove newline characters
+    text = re.sub(r'\n', ' ', text)
     return text.lower().strip()
 
 def train_validate_test_split(df, train_percent=.6, validate_percent=.2, seed=None):
