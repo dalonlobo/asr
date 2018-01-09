@@ -85,6 +85,8 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
         pickle.dump(data_to_df, f)
     # Convert the list to pandas dataframe
     df = pd.DataFrame(data=data_to_df, columns=["wav_filename", "wav_filesize", "transcript"])
+    # Drop the null values
+    df.dropna(inplace=True)
     # Save dataframe as csv
     logger.info("Saving the data to: "+os.path.join(basedirectory, videoid + "_data.csv"))
     df.to_csv(os.path.join(basedirectory, videoid + "_data.csv"), index=False)
