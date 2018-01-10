@@ -16,6 +16,9 @@ import re
 import numpy as np
 import pandas as pd
 import pysrt
+import zipfile
+
+from distutils.dir_util import copy_tree
 
 logger = logging.getLogger("__main__")
         
@@ -42,6 +45,8 @@ def convert_to_ms(st):
                   (st.seconds * 1000) + (st.milliseconds)
                   
 def pre_process_srt(text):
+    # Replace the unicodes 
+    text = text.replace(u"\u2018", "'").replace(u"\u2019", "'")
     # Remove the contents before :
     text = re.sub(r'.*:', '', text)
     # Remove contents inside the paranthesis
@@ -90,8 +95,15 @@ def clean_srt_min_duration(srt_file, DURATION=1000):
     subs.clean_indexes() # cleanup the indexes
     subs.save(srt_file) # Save to same srt file
             
+def copy_contents(source, destination):
+    "Copy the contents of source to destination"
+    copy_tree(source, destination)
+    return True
     
-    
+def zipdir(path, ziph):
+    " ziph is zipfile handle "
+    for files in os.listdir(path):
+        ziph.write(os.path.join(path, files))
     
     
     
