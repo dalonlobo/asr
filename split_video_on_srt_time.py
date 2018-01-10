@@ -25,7 +25,10 @@ from pydub.silence import split_on_silence
 
 logger = logging.getLogger("__main__")
 
-def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
+def _clean_filename_for_asure(x):
+    return x.split("/")[-1]
+
+def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid, for_azure=False):
     try:
         # Path to the mp4 file
         mp4_fpath = glob.glob(directory + "/*.mp4")[0]
@@ -67,7 +70,7 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
         # pydub segments are in milliseconds
         segment = audio_segments[start_in_ms:end_in_ms]
         # Path to the audio segment
-        segment_path = os.path.join(samples_path, "sample_{}.wav".format(str(index).zfill(10)))
+        segment_path = os.path.join(samples_path, videoid+"_sample_{}.wav".format(str(index).zfill(10)))
         # check if the segment is greater than 5s
         duration = end_in_ms - start_in_ms
         if duration > 5000:
@@ -87,10 +90,19 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
     df = pd.DataFrame(data=data_to_df, columns=["wav_filename", "wav_filesize", "transcript"])
     # Drop the null values
     df.dropna(inplace=True)
-    # Save dataframe as csv
-    logger.info("Saving the data to: "+os.path.join(basedirectory, videoid + "_data.csv"))
-    df.to_csv(os.path.join(basedirectory, videoid + "_data.csv"), index=False)
-    logger.info("Processing of video {} done".format(videoid))
+    if for_azure:
+        df["wav_filename"] = df["wav_filename"].map(_clean_filename_for_asure)
+        df.drop("wav_filesize", axis=1, inplace=True)
+        # Save dataframe as csv
+        logger.info("Saving the data to: "+os.path.join(basedirectory, videoid + "_data.csv"))
+        df.to_csv(os.path.join(basedirectory, videoid + "_data.txt"), index=False,\
+                  header=False, sep=b'\t')
+        logger.info("Processing of video {} done".format(videoid))
+    else:
+        # Save dataframe as csv
+        logger.info("Saving the data to: "+os.path.join(basedirectory, videoid + "_data.csv"))
+        df.to_csv(os.path.join(basedirectory, videoid + "_data.csv"), index=False)
+        logger.info("Processing of video {} done".format(videoid))
     return True
     
     
@@ -103,3 +115,4 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid):
         
         
         
+

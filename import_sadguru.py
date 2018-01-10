@@ -148,6 +148,8 @@ if __name__ == "__main__":
             df = df.append(temp_df)
         logger.info("All the csv files are merged, shape of the total dataframe is: ")
         logger.info(df.shape)
+        # Drop the null values
+        df.dropna(inplace=True)
         train_df, dev_df, test_df = train_validate_test_split(df, train_percent=.7, 
                                                               validate_percent=.2, seed=200)
         print("All the dataframes are split into train, dev and test", file=sys.stderr)

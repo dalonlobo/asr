@@ -46,8 +46,8 @@ def pre_process_srt(text):
     text = re.sub(r'.*:', '', text)
     # Remove contents inside the paranthesis
     text = re.sub(r"\([^)]*\)", '' , text)
-    # Remove special characters
-    text = re.sub('[^A-Za-z0-9\s\']+', ' ', text)
+    # Remove special characters and digits
+    text = re.sub('[^A-Za-z\s\']+', ' ', text)
     # Remove newline characters
     text = re.sub(r'\n', ' ', text)
     return text.lower().strip()
