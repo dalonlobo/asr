@@ -28,7 +28,7 @@ logger = logging.getLogger("__main__")
 def _clean_filename_for_asure(x):
     return x.split("/")[-1]
 
-def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid, for_azure=False):
+def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid, for_azure=False, BUFFER_IN_MS=250):
     try:
         # Path to the mp4 file
         mp4_fpath = glob.glob(directory + "/*.mp4")[0]
@@ -58,7 +58,7 @@ def split_video_on_srt_time(basedirectory, checkpoint_dir, directory, videoid, f
     # Read the srt file
     subtitles = pysrt.open(srt_fpath)
     # Buffer in milliseconds to append to start and end of each segment
-    BUFFER_IN_MS = 250
+    BUFFER_IN_MS = BUFFER_IN_MS
     # Entire list of tuple Path_to_wav,size,transcript
     data_to_df = []
     for index, subtitle in enumerate(subtitles):

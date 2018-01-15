@@ -34,7 +34,7 @@ if __name__ == "__main__":
     logs_path = os.path.basename(__file__) + ".logs"
     logger = logging.getLogger("__main__")
     logger.setLevel(logging.DEBUG)
-    rotatinghandler = logging.handlers.RotatingFileHandler(logs_path, maxBytes=500000, backupCount=100)
+    rotatinghandler = logging.handlers.RotatingFileHandler(logs_path, maxBytes=5000000, backupCount=100)
     rotatinghandler.setLevel(logging.DEBUG)
     # Send mail when exception occurs
 #    smtp_handler = logging.handlers.SMTPHandler(
@@ -70,7 +70,7 @@ if __name__ == "__main__":
                             help='Path to checkpoint directory')
         parser.add_argument('--stop', '-n', type=str, default='n', 
                             help="Don't stop if video directory exists (y or n)")
-        args = parser.parse_args(["--vidlist", "SADHGuru_for_asure.xlsx",
+        args = parser.parse_args(["--vidlist", "SADHGuru_for_asure_long.xlsx",
                                   "--checkpoint_dir", "tmp/checkpoint",
                                   "--destpath", "tmp"])
 #        args = parser.parse_args()
@@ -94,7 +94,7 @@ if __name__ == "__main__":
             try:
                input = raw_input # Py 2 and 3 compatibility
             except NameError:
-               pass
+               pass 
             if args.stop == "y":
                 user_input = input("Do you want to continue? y or n\n")
                 if user_input != "y":
@@ -133,7 +133,8 @@ if __name__ == "__main__":
                 continue # If its not directory, just continue
             logger.info("Splitting the video in following directory:")
             logger.info(directory)
-            split_video_on_srt_time(videospath, checkpoint_dir, directory, dirs, for_azure=True)
+            split_video_on_srt_time(videospath, checkpoint_dir, directory, dirs, \
+                                    for_azure=True, BUFFER_IN_MS=250)
         print("All the videos are converted to audio and split successfully", file=sys.stderr)
         logger.info("Merging the txt files")  
         # Path to txt files

@@ -19,6 +19,7 @@ import pysrt
 import zipfile
 
 from distutils.dir_util import copy_tree
+from distutils.errors import DistutilsFileError
 
 logger = logging.getLogger("__main__")
         
@@ -97,8 +98,12 @@ def clean_srt_min_duration(srt_file, DURATION=1000):
             
 def copy_contents(source, destination):
     "Copy the contents of source to destination"
-    copy_tree(source, destination)
-    return True
+    try:
+        copy_tree(source, destination)
+        return True
+    except DistutilsFileError as e:
+        logger.exception(e)
+        return False
     
 def zipdir(path, ziph):
     " ziph is zipfile handle "
