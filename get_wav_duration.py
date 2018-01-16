@@ -25,14 +25,17 @@ def duration(fpath, above_5s):
     print("Calculating duration: ", fpath)
     total_duration = 0
     print("Total files: ", len(glob.glob(fpath + '/*.wav')))
-    for files in glob.glob(fpath + '/*.wav'):
-        with contextlib.closing(wave.open(files,'r')) as f:
-            frames = f.getnframes()
-            rate = f.getframerate()
-            file_duration = frames / float(rate)
-            if file_duration > 5:
-                above_5s.append(file_duration)
-            total_duration += file_duration
+    try:
+        for files in glob.glob(fpath + '/*.wav'):
+            with contextlib.closing(wave.open(files,'r')) as f:
+                frames = f.getnframes()
+                rate = f.getframerate()
+                file_duration = frames / float(rate)
+                if file_duration > 5:
+                    above_5s.append(file_duration)
+                total_duration += file_duration
+    except:
+        pass
     return (total_duration, above_5s)
 
 if __name__ == "__main__":    
