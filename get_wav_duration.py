@@ -31,8 +31,7 @@ def duration(fpath, above_5s):
                 frames = f.getnframes()
                 rate = f.getframerate()
                 file_duration = frames / float(rate)
-                if file_duration > 5:
-                    above_5s.append(file_duration)
+                above_5s.append(file_duration)
                 total_duration += file_duration
     except:
         pass
