@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print("Max duration of files: ",max(all_durations))
     print("Number of files above 5s: ",len(all_durations))
     print()
-    with open("wav_greater_than_5_"+datetime.now().strftime('%Y-%m-%d-%H-%M')+".b",'wb') as f:
+    with open("wav_durations_"+datetime.now().strftime('%Y-%m-%d-%H-%M')+".b",'wb') as f:
         pickle.dump(all_durations, f)   
         print("Above 5s list is pickled")
     print("Total duration in hours {}hrs".format((duration_s/60)/60))
