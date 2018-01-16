@@ -42,12 +42,14 @@ if __name__ == "__main__":
     print(fpath)
     duration_s = 0
     above_5s = []
-    for dirs in os.listdir(fpath):
+    total_dirs = len(os.listdir(fpath))
+    for index, dirs in enumerate(os.listdir(fpath)):
         directory = os.path.join(fpath, dirs)
         if not os.path.isdir(directory):
             continue # If its not directory, just continue
         dur, above_5s = duration(os.path.join(directory,"samples"), above_5s)
         duration_s += dur
+        print("Completed {} of {}".format(index, total_dirs))
     print()
     print("Max duration of files: ",max(above_5s))
     print("Number of files above 5s: ",len(above_5s))
