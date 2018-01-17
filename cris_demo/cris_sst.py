@@ -34,6 +34,7 @@ def cris_stt(wav_folder, vid_directory):
             logger.info("Uploading: " + wav_file)
             headers = {'Ocp-Apim-Subscription-Key': conf["Ocp-Apim-Subscription-Key"]}
             payload = open(wav_file, 'rb').read()
+            print("Requesting", file=sys.stderr)
             r = requests.post(conf["url"], headers=headers, data=payload)
             transcripts.append((wav_file, wav_file.split("/")[-1], r.json()["DisplayText"]))
             logger.info("Transcription: " + str(transcripts[-1]))
