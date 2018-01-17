@@ -25,12 +25,12 @@ from requests.exceptions import ConnectionError
 logger = logging.getLogger("__main__")  
 
 def cris_stt(wav_folder, vid_directory):
-    DELAY = 2 # Delay in seconds
+    DELAY = 3 # Delay in seconds
     # Dataframe with all the transcripts
     transcripts = []
     for wav_file in glob.glob(wav_folder + os.path.sep + "*.wav"):
         try:
-            DELAY = DELAY if DELAY <= 5 else 2
+            DELAY = DELAY if DELAY <= 5 else 3
             logger.info("Uploading: " + wav_file)
             headers = {'Ocp-Apim-Subscription-Key': conf["Ocp-Apim-Subscription-Key"]}
             payload = open(wav_file, 'rb').read()
@@ -48,6 +48,12 @@ def cris_stt(wav_folder, vid_directory):
             logger.error(r.text)
             try:
                 print(r.json(), file=sys.stderr)
+                if r.json()["Message"].startswith("Too"):
+                    time.sleep(5)
+                    print("Trying again: " + wav_file, file=sys.stderr)
+                    r = requests.post(conf["url"], headers=headers, data=payload)
+                    transcripts.append((wav_file, wav_file.split("/")[-1], r.json()["DisplayText"]))
+                    logger.info("Transcription: " + str(transcripts[-1]))
             except:
                 pass
             traceback.print_exc()
