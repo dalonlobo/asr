@@ -104,3 +104,11 @@ ENV/
 tmp/
 *.logs
 *.logs.*
+cris_demo/config.json
+config.json
+cris_demo/Videos
+cris_demo/Kul_translation
+ds/tmp
+ds/tmp_archive
+ds/*.zip
+ds/dalon_short_video
