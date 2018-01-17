@@ -46,6 +46,7 @@ def cris_stt(wav_folder, vid_directory):
         except Exception as e:
             logger.error("Error:")
             logger.error(r.text)
+            traceback.print_exc()
             try:
                 print(r.json(), file=sys.stderr)
                 if r.json()["Message"].startswith("Too"):
@@ -53,11 +54,10 @@ def cris_stt(wav_folder, vid_directory):
                     print("Trying again: " + wav_file, file=sys.stderr)
                     r = requests.post(conf["url"], headers=headers, data=payload)
                     transcripts.append((wav_file, wav_file.split("/")[-1], r.json()["DisplayText"]))
+                    print("Request complete this time", file=sys.stderr)
                     logger.info("Transcription: " + str(transcripts[-1]))
             except:
-                pass
-            traceback.print_exc()
-            transcripts.append((wav_file, wav_file.split("/")[-1], ""))
+                transcripts.append((wav_file, wav_file.split("/")[-1], ""))
             DELAY += 1
             time.sleep(5) # Give some time interval
         
