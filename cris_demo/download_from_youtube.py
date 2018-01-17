@@ -146,7 +146,7 @@ if __name__ == "__main__":
                         help='Path to the excel file containing list of videos to download')
     parser.add_argument('--destpath', type=str,  
                         help='Path to store the video files')
-    args = parser.parse_args(["--vidlist", "test_small_vid.xlsx", \
+    args = parser.parse_args(["--vidlist", "cris_benchmarck.xlsx", \
                               "--destpath", "Videos"])
     # Path to the destination folder, where videos will be saved 
     destpath = os.path.abspath(args.destpath)

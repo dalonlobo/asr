@@ -18,33 +18,41 @@ import json
 import requests
 import traceback
 import time
+
 from utils import pre_process_srt
+from requests.exceptions import ConnectionError
 
 logger = logging.getLogger("__main__")  
 
 def cris_stt(wav_folder, vid_directory):
+    DELAY = 2 # Delay in seconds
     # Dataframe with all the transcripts
     transcripts = []
     for wav_file in glob.glob(wav_folder + os.path.sep + "*.wav"):
         try:
-            print("Uploading:", wav_file)
+            DELAY = DELAY if DELAY <= 5 else 2
+            logger.info("Uploading: " + wav_file)
             headers = {'Ocp-Apim-Subscription-Key': conf["Ocp-Apim-Subscription-Key"]}
             payload = open(wav_file, 'rb').read()
             r = requests.post(conf["url"], headers=headers, data=payload)
             transcripts.append((wav_file, wav_file.split("/")[-1], r.json()["DisplayText"]))
-            print("Transcription:", transcripts[-1])
-            time.sleep(1) # 1 second sleep to respect rate limit
+            logger.info("Transcription: " + str(transcripts[-1]))
+            time.sleep(DELAY) # 1 second sleep to respect rate limit
+        except ConnectionError as e:
+            logger.exception(e)
+            DELAY += 1
+            time.sleep(5)
         except Exception as e:
-            print("Error:")
-            print(r.text)
+            logger.error("Error:")
+            logger.error(r.text)
             try:
-                print(r.json())
+                print(r.json(), file=sys.stderr)
             except:
                 pass
             traceback.print_exc()
             transcripts.append((wav_file, wav_file.split("/")[-1], ""))
+            DELAY += 1
             time.sleep(5) # Give some time interval
-            pass
         
     df = pd.DataFrame(data=transcripts, columns=["wav_path", "wav_name", "transcripts"])
     df.sort_values("wav_name", inplace=True)
