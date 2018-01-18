@@ -18,6 +18,8 @@ import json
 import requests
 import traceback
 import time
+import pickle
+import datetime
 
 from utils import pre_process_srt
 from requests.exceptions import ConnectionError
@@ -63,12 +65,23 @@ def cris_stt(wav_folder, vid_directory):
         
     df = pd.DataFrame(data=transcripts, columns=["wav_path", "wav_name", "transcripts"])
     df.sort_values("wav_name", inplace=True)
-    with open(os.path.join(vid_directory, 'cris_stt_df.xlsx'), 'w') as f:
-        df.to_excel(f, index=False)
-        
-    with open(os.path.join(vid_directory, 'cris_hyp.txt'), 'w') as f:
-        for trans in df["transcripts"]:
-            f.write(pre_process_srt(trans) + " ")
+    try:
+        with open(os.path.join(vid_directory, 'transcripts_list_'+\
+                               datetime.datetime.now().strftime("%H:%M:%S")+".b"), 'wb') as f:
+            df.to_excel(f, index=False)
+    except:
+        pass
+    try:
+        with open(os.path.join(vid_directory, 'cris_stt_df.xlsx'), 'w') as f:
+            df.to_excel(f, index=False)
+    except:
+        pass    
+    try:        
+        with open(os.path.join(vid_directory, 'cris_hyp.txt'), 'w') as f:
+            for trans in df["transcripts"]:
+                f.write(pre_process_srt(trans) + " ")
+    except:
+        pass
 
 if __name__ == "__main__":
     """
