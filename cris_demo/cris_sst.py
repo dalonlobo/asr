@@ -68,7 +68,7 @@ def cris_stt(wav_folder, vid_directory):
     try:
         with open(os.path.join(vid_directory, 'transcripts_list_'+\
                                datetime.datetime.now().strftime("%H:%M:%S")+".b"), 'wb') as f:
-            df.to_excel(f, index=False)
+           pickle.dump(transcripts, f)
     except:
         pass
     try:
