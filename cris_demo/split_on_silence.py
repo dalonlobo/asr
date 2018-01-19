@@ -97,16 +97,16 @@ def split_on_silence_threshold(wav_file):
         split_durations.append((chunk_file_name, chunk_file_name.split("/")[-1],\
                                 chunk[1], chunk[2]))
     try:
-        with open(os.path.join(dest_dir, "split_durations.b"), "wb") as f:
+        with open(os.path.join(abs_path, "split_durations.b"), "wb") as f:
             pickle.dump(split_durations, f)
     except:
         pass    
     try:
-        with open(os.path.join(dest_dir, "split_df.csv"), "wb") as f:
+        with open(os.path.join(abs_path, "split_df.csv"), "wb") as f:
             df = pd.DataFrame(split_durations, columns=["wav_filepath", "wav_filename",\
                                                         "start", "end"])
             df.to_csv(f, index=False)
-            print("Split df saved to: ", os.path.join(dest_dir, "split_df.csv"),\
+            print("Split df saved to: ", os.path.join(abs_path, "split_df.csv"),\
                   file=sys.stderr)
     except:
         pass
