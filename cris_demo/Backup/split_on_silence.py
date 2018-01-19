@@ -13,39 +13,14 @@ import sys
 import argparse
 import logging
 import glob
-import pickle
 import pandas as pd
 
 from utils import convert_mp4_to_audio, run_command
 from pydub import AudioSegment
 from pydub.effects import normalize
-from pydub.silence import detect_nonsilent
+from pydub.silence import split_on_silence
 
 logger = logging.getLogger("__main__")     
-
-def split_on_silence_custom(audio_segment, min_silence_len=1000, silence_thresh=-16, keep_silence=100,
-                     seek_step=1):
-    """
-    audio_segment - original pydub.AudioSegment() object
-    min_silence_len - (in ms) minimum length of a silence to be used for
-        a split. default: 1000ms
-    silence_thresh - (in dBFS) anything quieter than this will be
-        considered silence. default: -16dBFS
-    keep_silence - (in ms) amount of silence to leave at the beginning
-        and end of the chunks. Keeps the sound from sounding like it is
-        abruptly cut off. (default: 100ms)
-    return chunk=((chunk, start, end))
-    """
-
-    not_silence_ranges = detect_nonsilent(audio_segment, min_silence_len, silence_thresh)
-
-    chunks = []
-    for start_i, end_i in not_silence_ranges:
-        start_i = max(0, start_i - keep_silence)
-        end_i += keep_silence
-        chunks.append((audio_segment[start_i:end_i], start_i, end_i))
-
-    return chunks
 
 def split_on_silence_threshold(wav_file):
     """
@@ -76,7 +51,7 @@ def split_on_silence_threshold(wav_file):
     # Splits the audio if silence duration is MSL long
     MSL = 500 # minimum silence length in ms
     print("Splitting into silence chunks", file=sys.stderr)
-    chunks = split_on_silence_custom(
+    chunks = split_on_silence(
         full_audio_wav,    
         # split on silences longer than 500ms (500ms)
         min_silence_len=MSL,    
@@ -87,30 +62,12 @@ def split_on_silence_threshold(wav_file):
         )
     # Saving all the chunks
     print("Writing all the files, this may take some time!", file=sys.stderr)
-    # save start and end time aswell
-    split_durations = []
     for index, chunk in enumerate(chunks):
         chunk_file_name = os.path.join(dest_dir, "sample_{}.wav".format(str(index).zfill(10)))
         print("Saving the file to " + chunk_file_name, file=sys.stderr)
         # You can export as mp3 etc, note that it has dependency on ffmpeg
-        chunk[0].export(chunk_file_name, format="wav")
-        split_durations.append((chunk_file_name, chunk_file_name.split("/")[-1],\
-                                chunk[1], chunk[2]))
-    try:
-        with open(os.path.join(dest_dir, "split_durations.b"), "wb") as f:
-            pickle.dump(split_durations, f)
-    except:
-        pass    
-    try:
-        with open(os.path.join(dest_dir, "split_df.csv"), "wb") as f:
-            df = pd.DataFrame(split_durations, columns=["wav_filepath", "wav_filename",\
-                                                        "start", "end"])
-            df.to_csv(f, index=False)
-            print("Split df saved to: ", os.path.join(dest_dir, "split_df.csv"),\
-                  file=sys.stderr)
-    except:
-        pass
-    
+        chunk.export(chunk_file_name, format="wav")
+
 def _future_work_():
     """
     -> You can use detect_nonsilent or detect_nonsilent from silence module
