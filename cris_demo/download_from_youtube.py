@@ -144,10 +144,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Download videos from youtube")
     parser.add_argument('--vidlist', type=str,  
                         help='Path to the excel file containing list of videos to download')
-    parser.add_argument('--destpath', type=str,  
+    parser.add_argument('--destpath', type=str, default='Videos', 
                         help='Path to store the video files')
-    args = parser.parse_args(["--vidlist", "sadguru_short_5_vid.xlsx", \
-                              "--destpath", "Videos"])
+    #args = parser.parse_args(["--vidlist", "sadguru_short_vid.xlsx", \
+    #                          "--destpath", "Videos"])
+    args = parser.parse_args()    
     # Path to the destination folder, where videos will be saved 
     destpath = os.path.abspath(args.destpath)
     # path to excel  file containing the list of videos to download

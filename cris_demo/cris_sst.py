@@ -21,6 +21,7 @@ import time
 import pickle
 import datetime
 
+from timeit import default_timer as timer
 from utils import pre_process_srt
 from requests.exceptions import ConnectionError
 
@@ -118,6 +119,7 @@ if __name__ == "__main__":
         conf = json.load(f)
     srcpath = os.path.abspath(args.srcpath)
     logger.debug("Reading the files: \n")
+    start_time = timer()
     for dirs in os.listdir(srcpath):
         vid_directory = os.path.join(srcpath, dirs)
         split_directory = os.path.join(vid_directory, "custom_split")
@@ -125,6 +127,9 @@ if __name__ == "__main__":
             continue # If its not directory, just continue
         logger.info("Passing: " + split_directory)
         cris_stt(split_directory, vid_directory)
+    total_time = timer() - start_time
+    print('Entire program ran in %0.3f minutes.' % (total_time / 60), file=sys.stderr)
+    logging.info('Entire program ran in %0.3f minutes.' % (total_time / 60))
     logger.info("All wavs transcribed")
     print("All wav transcribed", file=sys.stderr)
     logger.info("#########################")
