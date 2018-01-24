@@ -32,7 +32,7 @@ def create_srt(split_df, cris_stt_df):
         new_srt.append(SubRipItem(index=index+1,
                               start=SubRipTime(milliseconds=row['start']),
                               end=SubRipTime(milliseconds=row['end']),
-                              text=str(row['transcripts'] if \
+                              text=str(row['transcripts'][:-1] if \
                                        type(row['transcripts']) != float \
                                        else "")))
     new_srt.save(os.path.join(abs_path, "stt_converted.srt"))
