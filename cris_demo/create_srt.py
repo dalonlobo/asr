@@ -56,9 +56,9 @@ if __name__ == "__main__":
     parser.add_argument('--srcpath', type=str,  
                         help='Path to the folder mp4 files')
     # Remove the below line 
-    args = parser.parse_args(["--srcpath", "Videos"])
+    # args = parser.parse_args(["--srcpath", "Videos"])
     # Uncomment the below line
-    # args = parser.parse_args()
+    args = parser.parse_args()
     srcpath = os.path.abspath(args.srcpath)
     logger.debug("Reading the files: \n")
     for dirs in os.listdir(srcpath):
