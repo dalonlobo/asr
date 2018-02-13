@@ -17,7 +17,7 @@ import pickle
 import pandas as pd
 import json
 
-from utils import convert_mp4_to_audio, run_command
+from custom_utils import convert_mp4_to_audio, run_command
 from pydub import AudioSegment
 from pydub.effects import normalize
 from pydub.silence import detect_nonsilent
@@ -94,7 +94,7 @@ def split_on_silence_threshold(wav_file):
     total_chunks = len(chunks)
     for index, chunk in enumerate(chunks):
         chunk_file_name = os.path.join(dest_dir, "sample_{}.flac".format(str(index).zfill(10)))
-        print("Saving file number {} of {}".format(index, total_chunks), file=sys.stderr)
+        print("Saving file number {} of {}".format(index, total_chunks))
         print("Saving the file to " + chunk_file_name, file=sys.stderr)
         # You can export as mp3 etc, note that it has dependency on ffmpeg
         chunk[0].export(chunk_file_name, format="flac")

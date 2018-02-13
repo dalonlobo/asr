@@ -14,7 +14,7 @@ import argparse
 import logging
 import glob
 
-from utils import cmd_for_mp4_to_flac, run_command
+from custom_utils import cmd_for_mp4_to_flac, run_command
 
 logger = logging.getLogger("__main__")
 

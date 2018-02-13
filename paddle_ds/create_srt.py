@@ -19,10 +19,10 @@ from pysrt.srtitem import SubRipTime
 
 logger = logging.getLogger("__main__")    
 
-def create_srt(split_df, cris_stt_df):
+def create_srt(split_df, ds2_stt_df):
     abs_path = os.path.dirname(split_df)
     df1 = pd.read_csv(split_df)
-    df2 = pd.read_excel(cris_stt_df)
+    df2 = pd.read_csv(ds2_stt_df)
     df1.rename(columns={'wav_filename': 'wav_name'}, inplace=True)
     # This df3 contains all the info for srt creation
     df3 = pd.merge(df1, df2,  how='inner', on='wav_name')
@@ -37,7 +37,7 @@ def create_srt(split_df, cris_stt_df):
                               end=SubRipTime(milliseconds=row['end']),
                               text=text[:-1] if text.endswith(".") else text
                                 ))
-    new_srt.save(os.path.join(abs_path, "stt_converted.srt"))
+    new_srt.save(os.path.join(abs_path, abs_path.split("/")[-1]+"_stt_converted.srt"))
     print("successfully written")
 
 if __name__ == "__main__":
@@ -67,11 +67,11 @@ if __name__ == "__main__":
         vid_directory = os.path.join(srcpath, dirs)
         if not os.path.isdir(vid_directory):
             continue # If its not directory, just continue
-        split_df = os.path.join(vid_directory, "split_df.csv")
-        cris_stt_df = os.path.join(vid_directory, "cris_stt_df.xlsx")
+        split_df = os.path.join(vid_directory, "split_durations.csv")
+        ds2_stt_df = os.path.join(vid_directory, "ds2_stt_complete.csv")
         print("Reading files:")
-        print(split_df, cris_stt_df, sep="\n")
-        create_srt(split_df, cris_stt_df)
+        print(split_df, ds2_stt_df, sep="\n")
+        create_srt(split_df, ds2_stt_df)
     logger.info("All srt converted")
     print("All srt converted", file=sys.stderr)
     logger.info("#########################")

@@ -15,7 +15,7 @@ import logging
 import pysrt
 import glob
 
-from utils import pre_process_srt
+from custom_utils import pre_process_srt
 
 logger = logging.getLogger("__main__")
 

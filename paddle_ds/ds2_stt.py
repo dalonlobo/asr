@@ -79,13 +79,6 @@ def evaluate():
         num_threads=args.num_proc_data,
         keep_transcription_text=True)
 
-#    batch_reader = data_generator.batch_reader_creator(
-#        manifest_path=args.test_manifest,
-#        batch_size=args.batch_size,
-#        min_batch_size=1,
-#        sortagrad=False,
-#        shuffle_method=None)
-
     ds2_model = DeepSpeech2Model(
         vocab_size=data_generator.vocab_size,
         num_conv_layers=args.num_conv_layers,
@@ -125,11 +118,14 @@ def evaluate():
                 vocab_list=vocab_list,
                 num_processes=1)
         return result_transcript[0]
-
-    for dirs in os.listdir(args.src_path):
-        parentdir = os.path.join(srcpath, dirs)
+    print("Line 121")
+    number_of_videos = len(os.listdir(args.src_path))
+    for index, dirs in enumerate(os.listdir(args.src_path)):
+        print("Line: 124")
+        parentdir = os.path.join(args.src_path, dirs)
         if not os.path.isdir(parentdir):
             continue # If its not directory, just continue
+        print("Working on {}/{} Video".format(index+1,number_of_videos))
         manifest_path = os.path.join(parentdir, "manifest.txt")
         print(parentdir)
         manifest = read_manifest(
@@ -160,39 +156,6 @@ def evaluate():
                     f.write(pre_process_srt(trans) + " ")
         except:
             pass
-#    errors_sum, len_refs, num_ins = 0.0, 0, 0
-#    ds2_model.logger.info("start evaluation ...")
-#    for infer_data in batch_reader():
-#        probs_split = ds2_model.infer_batch_probs(
-#            infer_data=infer_data,
-#            feeding_dict=data_generator.feeding)
-
-#        if args.decoding_method == "ctc_greedy":
-#            result_transcripts = ds2_model.decode_batch_greedy(
-#                probs_split=probs_split,
-#                vocab_list=vocab_list)
-#        else:
-#            result_transcripts = ds2_model.decode_batch_beam_search(
-#                probs_split=probs_split,
-#                beam_alpha=args.alpha,
-#                beam_beta=args.beta,
-#                beam_size=args.beam_size,
-#                cutoff_prob=args.cutoff_prob,
-#                cutoff_top_n=args.cutoff_top_n,
-#                vocab_list=vocab_list,
-#                num_processes=args.num_proc_bsearch)
-#        target_transcripts = [data[1] for data in infer_data]
-
-#        for target, result in zip(target_transcripts, result_transcripts):
-#            errors, len_ref = errors_func(target, result)
-#            errors_sum += errors
-#            len_refs += len_ref
-#            num_ins += 1
-#        print("Error rate [%s] (%d/?) = %f" %
-#              (args.error_rate_type, num_ins, errors_sum / len_refs))
-#    print("Final error rate [%s] (%d/%d) = %f" %
-#          (args.error_rate_type, num_ins, num_ins, errors_sum / len_refs))
-
     ds2_model.logger.info("finish evaluation")
 
 def main():
