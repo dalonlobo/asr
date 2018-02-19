@@ -125,44 +125,36 @@ def evaluate():
                 vocab_list=vocab_list,
                 num_processes=1)
         return result_transcript[0]
-    print("Line 121")
-    number_of_videos = len(os.listdir(args.src_path))
-    for index, dirs in enumerate(os.listdir(args.src_path)):
-        print("Line: 124")
-        parentdir = os.path.join(args.src_path, dirs)
-        if not os.path.isdir(parentdir):
-            continue # If its not directory, just continue
-        print("Working on {}/{} Video".format(index+1,number_of_videos))
-        manifest_path = args.manifest_path
-        print(parentdir)
-        manifest = read_manifest(
-            manifest_path=manifest_path)
-        transcripts = []
-        for entry in manifest:
-            fname = entry["audio_filepath"]
-            transcript = file_to_transcript(fname)
-            transcripts.append((fname, fname.split("/")[-1], transcript))
-            print(transcript)
 
-        df = pd.DataFrame(data=transcripts, columns=["wav_path", "wav_name", "transcripts"])
-        df.sort_values("wav_name", inplace=True)
-        try:
-            with open(os.path.join(parentdir, 'transcripts_list_'+\
-                                   datetime.datetime.now().strftime("%H:%M:%S")+".b"), 'wb') as f:
-               pickle.dump(transcripts, f)
-        except:
-            pass
-        try:
-            with open(os.path.join(parentdir, 'ds2_stt_complete.csv'), 'w') as f:
-                df.to_csv(f, index=False)
-        except:
-            pass    
-        try:        
-            with open(os.path.join(parentdir, 'ds2_stt.txt'), 'w') as f:
-                for trans in df["transcripts"]:
-                    f.write(pre_process_srt(trans) + " ")
-        except:
-            pass
+    parentdir = os.path.join(args.src_path)
+    manifest_path = args.manifest_path
+    manifest = read_manifest(
+        manifest_path=manifest_path)
+    transcripts = []
+    for entry in manifest:
+        fname = entry["audio_filepath"]
+        transcript = file_to_transcript(fname)
+        transcripts.append((fname, fname.split("/")[-1], transcript))
+
+    df = pd.DataFrame(data=transcripts, columns=["wav_path", "wav_name", "transcripts"])
+    df.sort_values("wav_name", inplace=True)
+    try:
+        with open(os.path.join(parentdir, 'transcripts_list_'+\
+                               datetime.datetime.now().strftime("%H:%M:%S")+".b"), 'wb') as f:
+           pickle.dump(transcripts, f)
+    except:
+        pass
+    try:
+        with open(os.path.join(parentdir, 'ds2_stt_complete.csv'), 'w') as f:
+            df.to_csv(f, index=False)
+    except:
+        pass    
+    try:        
+        with open(os.path.join(parentdir, 'ds2_stt.txt'), 'w') as f:
+            for trans in df["transcripts"]:
+                f.write(pre_process_srt(trans) + " ")
+    except:
+        pass
     ds2_model.logger.info("finish evaluation")
 
 def main():
