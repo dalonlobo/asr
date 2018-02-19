@@ -181,6 +181,7 @@ if __name__ == '__main__':
         main()
         total_time = timer() - start_time
         print('Entire program ran in %0.3f minutes.' % (total_time / 60))
+        logger.info('Entire program ran in %0.3f minutes.' % (total_time / 60))
         sys.exit(0)
     except Exception as e:
         logger.exception(e)

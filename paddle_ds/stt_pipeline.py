@@ -68,6 +68,12 @@ def create_srt(srcpath):
 if __name__ == "__main__":
     """
     This script will run the entire pipeline of speech to text
+    :Steps in the Pipeline:
+        1. Download video from given id
+        2. Convert the mp4 to flac
+        3. Split the flac on the silence
+        4. Run deepspeech 2 model on the split files
+        5. Create the srt file
     :input:
         videoid : video id of youtube video
     :run:
@@ -124,8 +130,8 @@ if __name__ == "__main__":
         if exit_code != 0:
             raise Exception("Error in srt creation")  
         
-        logger.info("Stt successful".format(args.videoid))
-        print("Stt successful", file=sys.stderr)
+        logger.info("ASR successful".format(args.videoid))
+        print("ASR successful", file=sys.stderr)
         logger.info("############################################")
         logger.info(".....Exiting stt pipeline program.....")
         logger.info("#############################################")

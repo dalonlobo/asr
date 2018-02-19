@@ -71,7 +71,8 @@ if __name__ == "__main__":
             os.makedirs(dest_path)
         download_video(dest_path, args.videoid)
         logger.info("Video {} downloaded successfully".format(args.videoid))
-        print("Video downloaded successfully", file=sys.stderr)
+        print("Video downloaded successfully Video Id {}".format(args.videoid),\
+              file=sys.stderr)
         logger.info("############################################")
         logger.info(".....Exiting youtube downloader program.....")
         logger.info("#############################################")

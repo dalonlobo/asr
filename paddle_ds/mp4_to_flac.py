@@ -55,7 +55,7 @@ if __name__ == "__main__":
         for file_name in glob.glob(srcpath + os.path.sep + "*.mp4"):
             logger.info("Passing: " + file_name)
             convert_video_to_audio(file_name)
-        logger.info("All mp4 converted")
+        logger.info("MP4 converted for Video Id {}".format(args.srcpath))
         print("All mp4 converted", file=sys.stderr)
         logger.info("#########################")
         logger.info(".....Exiting program.....")
