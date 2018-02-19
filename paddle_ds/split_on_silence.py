@@ -16,6 +16,7 @@ import glob
 import pickle
 import pandas as pd
 import json
+import numpy as np
 
 from custom_utils import convert_mp4_to_audio, run_command
 from pydub import AudioSegment
@@ -25,7 +26,7 @@ from pydub.silence import detect_nonsilent
 logger = logging.getLogger("__main__")     
 
 def split_on_silence_custom(audio_segment, min_silence_len=1000, silence_thresh=-16, keep_silence=100,
-                     seek_step=1):
+                     seek_step=1, max_segment_duration=15000):
     """
     audio_segment - original pydub.AudioSegment() object
     min_silence_len - (in ms) minimum length of a silence to be used for
@@ -44,24 +45,31 @@ def split_on_silence_custom(audio_segment, min_silence_len=1000, silence_thresh=
     for start_i, end_i in not_silence_ranges:
         start_i = max(0, start_i - keep_silence)
         end_i += keep_silence
+        # If the segment is greater than max_segment_duration
+        # Hard split it into half
+        if end_i - start_i > max_segment_duration:
+            mid = (end_i - start_i) / 2 # Hard split
+            chunks.append((audio_segment[start_i:mid+start_i], start_i, mid+start_i))
+            chunks.append((audio_segment[mid+start_i:end_i], mid+start_i, end_i))
+            continue
         chunks.append((audio_segment[start_i:end_i], start_i, end_i))
-
+        
     return chunks
 
-def split_on_silence_threshold(wav_file):
+def split_on_silence_threshold(flac_file):
     """
     Splits the wav file in to chunks of wav files,
     based on the silence level
     Documentaion: http://pydub.com/
     Git: https://github.com/jiaaro/pydub/
     """
-    abs_path = os.path.dirname(wav_file)
+    abs_path = os.path.dirname(flac_file)
     dest_dir = os.path.join(abs_path, "custom_split")
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
-    logger.info("Splitting started: " + wav_file)    
+    logger.info("Splitting started: " + flac_file)    
     # Read the file
-    audioSegment = AudioSegment.from_file(wav_file, "flac")
+    audioSegment = AudioSegment.from_file(flac_file, "flac")
     # Calculating the silence threshold
     # Normalizing the audio file belfore finding the threshold
     full_audio_wav = normalize(audioSegment)
@@ -149,37 +157,37 @@ if __name__ == "__main__":
     """
     Split wavs on silence
     """
-    logs_path = os.path.basename(__file__) + ".logs"
-    logging.basicConfig(filename=logs_path,
-        filemode='a',
-        format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
-        datefmt='%H:%M:%S',
-        level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-    print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
-    print("Run the following command to view logs:\n", file=sys.stderr)
-    print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
-    parser = argparse.ArgumentParser(description="mp4 to wav")
-    parser.add_argument('--srcpath', type=str,  
-                        help='Path to the folder mp4 files')
-    # Remove the below line 
-    # args = parser.parse_args(["--srcpath", "Videos"])
-    # Uncomment the below line
-    args = parser.parse_args()
-    srcpath = os.path.abspath(args.srcpath)
-    logger.debug("Reading the files: \n")
-    for dirs in os.listdir(srcpath):
-        vid_directory = os.path.join(srcpath, dirs)
-        if not os.path.isdir(vid_directory):
-            continue # If its not directory, just continue
-        for file_name in glob.glob(vid_directory + os.path.sep + "*.flac"):
+    try:
+        logs_path = os.path.basename(__file__) + ".logs"
+        logging.basicConfig(filename=logs_path,
+            filemode='a',
+            format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
+            datefmt='%H:%M:%S',
+            level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
+        print("Run the following command to view logs:\n", file=sys.stderr)
+        print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
+        parser = argparse.ArgumentParser(description="mp4 to wav")
+        parser.add_argument('--srcpath', type=str,  
+                            help='Path to the folder flac files')
+        # Remove the below line 
+        # args = parser.parse_args(["--srcpath", "Videos"])
+        # Uncomment the below line
+        args = parser.parse_args()
+        srcpath = os.path.abspath(args.srcpath)
+        logger.debug("Reading the files: \n")
+        for file_name in glob.glob(srcpath + os.path.sep + "*.flac"):
             logger.info("Passing: " + file_name)
             split_on_silence_threshold(file_name)
-    logger.info("All mp4 converted")
-    print("All mp4 converted", file=sys.stderr)
-    logger.info("#########################")
-    logger.info(".....Exiting program.....")
-    logger.info("#########################")
-    print(".....Exiting program.....", file=sys.stderr)
+        logger.info("All mp4 converted")
+        print("All mp4 converted", file=sys.stderr)
+        logger.info("#########################")
+        logger.info(".....Exiting program.....")
+        logger.info("#########################")
+        print(".....Exiting program.....", file=sys.stderr)
+        sys.exit(0)
+    except Exception as e:
+        sys.exit(-1)
 
 

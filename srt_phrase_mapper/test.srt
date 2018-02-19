@@ -1,0 +1,592 @@
+1
+00:00:00,000 --> 00:00:03,378
+
+2
+00:00:07,500 --> 00:00:11,707
+the final thing will look at in terms of combining queries is exclusion
+
+3
+00:00:12,447 --> 00:00:17,137
+we used the exclusion activity to exclude unwanted query results
+
+4
+00:00:18,762 --> 00:00:23,607
+most businesses typically have a standard definition of who they want to exclude from their target
+
+5
+00:00:24,481 --> 00:00:29,745
+you can add a topology rule that will be applied during analysis to exclude these people
+
+6
+00:00:30,339 --> 00:00:35,425
+but you can also exclude them upfront in your workflow to get a more accurate count
+
+7
+00:00:36,650 --> 00:00:38,654
+to apply standard exclusions
+
+8
+00:00:38,909 --> 00:00:40,848
+start with your target population
+
+9
+00:00:41,127 --> 00:00:46,928
+and then define one or more additional queries to choose the recipients you want to exclude
+
+10
+00:00:47,574 --> 00:00:53,269
+and then use an exclusion activity to exclude that group of people from the main target
+
+11
+00:00:57,073 --> 00:01:00,196
+there are out of the box predefined user filters
+
+12
+00:01:00,326 --> 00:01:03,079
+which are useful for excluding recipients
+
+13
+00:01:03,480 --> 00:01:05,754
+such as blacklisted email
+
+14
+00:01:05,886 --> 00:01:07,506
+an email and quarantine
+
+15
+00:01:08,250 --> 00:01:12,851
+or you can always define your own filters to exclude recipients
+
+16
+00:01:13,063 --> 00:01:15,007
+and then save them for reuse
+
+17
+00:01:18,627 --> 00:01:21,348
+to define your own filter for reuse
+
+18
+00:01:21,605 --> 00:01:25,322
+either go to the predefined filter folder and click new
+
+19
+00:01:25,643 --> 00:01:28,990
+so from the explorer view under profiles and targets
+
+20
+00:01:29,464 --> 00:01:32,045
+going to predefined filters and click new
+
+21
+00:01:32,708 --> 00:01:35,500
+or you can edit a query activity
+
+22
+00:01:35,626 --> 00:01:40,368
+define your filtering conditions and then save it as a predefined filter
+
+23
+00:01:40,883 --> 00:01:47,544
+so you'll see save as highlighted it's right next to the distribution of values icon that's where you find the save option
+
+24
+00:01:48,491 --> 00:01:52,272
+then you would simply give that predefined filter
+
+25
+00:01:52,473 --> 00:01:53,333
+a label
+
+26
+00:01:54,102 --> 00:01:56,382
+and then you can use that again in the future
+
+27
+00:01:57,357 --> 00:01:58,276
+remember
+
+28
+00:01:58,700 --> 00:02:02,546
+the main thing for this type of filter
+
+29
+00:02:03,031 --> 00:02:06,868
+is that you are filtering for people that you do not
+
+30
+00:02:07,079 --> 00:02:08,458
+want to target
+
+31
+00:02:09,338 --> 00:02:17,364
+for example you might not want to target anyone whose email was empty they'll get dropped from analysis know during the analysis period anyway
+
+32
+00:02:18,371 --> 00:02:21,698
+or you might want to drop anyone that's an internal employee
+
+33
+00:02:22,005 --> 00:02:26,399
+or if you have any adobe campaign consultants who are in your data mart
+
+34
+00:02:26,654 --> 00:02:28,948
+as test records that sort of thing
+
+35
+00:02:29,260 --> 00:02:34,219
+or if you have any competitors in your database you might want to drop those domains
+
+36
+00:02:34,869 --> 00:02:35,272
+
+37
+00:02:35,421 --> 00:02:38,880
+so that's the only tricky thing is that you are
+
+38
+00:02:39,029 --> 00:02:40,067
+building of
+
+39
+00:02:40,192 --> 00:02:42,927
+filter for people that you don't want a target
+
+40
+00:02:48,972 --> 00:02:50,925
+then in your workflow
+
+41
+00:02:51,727 --> 00:02:54,335
+you would add an exclusion activity
+
+42
+00:02:54,895 --> 00:02:57,735
+and attach that exclusion activity
+
+43
+00:02:58,007 --> 00:03:01,639
+to the query results in your workflow
+
+44
+00:03:03,501 --> 00:03:11,550
+and the exclusion activity as we said the whole point is to remove one or more populations from the main population
+
+45
+00:03:12,095 --> 00:03:13,456
+so as a result
+
+46
+00:03:13,722 --> 00:03:15,643
+there should be the same number
+
+47
+00:03:15,818 --> 00:03:18,725
+or fewer recipients in the primary set
+
+48
+00:03:18,946 --> 00:03:20,481
+after an exclusion
+
+49
+00:03:21,300 --> 00:03:27,034
+so our example here we're looking for people who are over forty five and our first query
+
+50
+00:03:27,323 --> 00:03:31,316
+and our second query were cheering for people whose email is empty
+
+51
+00:03:32,493 --> 00:03:38,340
+now if we had the email address for all of those people who are forty five years and older
+
+52
+00:03:39,448 --> 00:03:42,999
+we wouldn't be dropping anyone but in this example
+
+53
+00:03:43,216 --> 00:03:45,906
+it looks like we went from a hundred and five
+
+54
+00:03:46,272 --> 00:03:47,662
+forty five year olds
+
+55
+00:03:47,861 --> 00:03:49,297
+down to ninety five
+
+56
+00:03:49,489 --> 00:03:52,721
+so we were in fact missing some email addresses
+
+57
+00:03:52,865 --> 00:03:56,176
+for those folks who are over forty five and our training environment
+
+58
+00:03:58,901 --> 00:03:59,928
+now the one
+
+59
+00:04:00,117 --> 00:04:05,028
+other important thing to note about an exclusion activity is that you must edit it
+
+60
+00:04:05,253 --> 00:04:07,907
+so double click on the exclusion activity
+
+61
+00:04:09,909 --> 00:04:10,784
+to add it
+
+62
+00:04:11,550 --> 00:04:15,592
+when you double click on the exclusion activity this is what you see
+
+63
+00:04:16,472 --> 00:04:17,582
+you must
+
+64
+00:04:17,793 --> 00:04:20,649
+configure this by selecting
+
+65
+00:04:21,024 --> 00:04:22,911
+the group that you want to keep
+
+66
+00:04:23,113 --> 00:04:25,643
+so you must identify the primary set
+
+67
+00:04:26,282 --> 00:04:29,558
+so in this case it would have been our men over forty five
+
+68
+00:04:29,793 --> 00:04:32,508
+or in our example that we're going to build in the lab
+
+69
+00:04:32,666 --> 00:04:34,450
+we'll keep our men
+
+70
+00:04:34,646 --> 00:04:37,996
+under thirty who live in either new york or la
+
+71
+00:04:40,010 --> 00:04:41,917
+you could if you want
+
+72
+00:04:42,403 --> 00:04:43,781
+generate the compliment
+
+73
+00:04:43,902 --> 00:04:46,296
+to see the people that fell out
+
+74
+00:04:46,673 --> 00:04:49,047
+so the people that you're excluding
+
+75
+00:04:51,804 --> 00:04:54,393
+so let's go do exercise for
+
+76
+00:04:54,794 --> 00:04:55,751
+part five
+
+77
+00:04:55,973 --> 00:04:57,198
+in our lab handbook
+
+78
+00:04:58,198 --> 00:05:02,511
+we're going to add another query activity to our segmentation workflow
+
+79
+00:05:06,621 --> 00:05:08,662
+an edit that query activity
+
+80
+00:05:12,330 --> 00:05:15,675
+were to choose filtering conditions as the target type
+
+81
+00:05:20,143 --> 00:05:24,982
+and we're gonna take advantage of the predefined filter that exists in here
+
+82
+00:05:25,342 --> 00:05:27,225
+for blacklisted email address
+
+83
+00:05:27,500 --> 00:05:29,281
+and then we're gonna add some
+
+84
+00:05:29,391 --> 00:05:31,640
+filtering criteria on top of that
+
+85
+00:05:32,423 --> 00:05:36,944
+so rather than just adding an expression i'm going to click on the drop down arrow
+
+86
+00:05:37,282 --> 00:05:38,341
+by ad
+
+87
+00:05:39,435 --> 00:05:41,893
+and then scroll down to predefined filter
+
+88
+00:05:42,663 --> 00:05:47,038
+and then take advantage of these predefined filters that come out of the box
+
+89
+00:05:47,614 --> 00:05:50,293
+i'm in a pick blacklisted email address
+
+90
+00:05:50,827 --> 00:05:51,720
+
+91
+00:05:53,593 --> 00:05:56,624
+i'm going to add another expression
+
+92
+00:05:57,837 --> 00:06:03,141
+as we mentioned earlier by default every time you add an expression
+
+93
+00:06:03,675 --> 00:06:11,580
+they are combined with an and to change this one i want this to be an or instead i'm simply gonna click on and
+
+94
+00:06:12,416 --> 00:06:13,178
+and then
+
+95
+00:06:13,680 --> 00:06:15,097
+change this or
+
+96
+00:06:16,655 --> 00:06:19,504
+for my second expression i'm gonna click in
+
+97
+00:06:21,240 --> 00:06:22,650
+edit the expression
+
+98
+00:06:25,615 --> 00:06:27,163
+and i'm going to choose
+
+99
+00:06:27,315 --> 00:06:28,759
+email
+
+100
+00:06:29,607 --> 00:06:31,126
+choose the email attribute
+
+101
+00:06:31,969 --> 00:06:33,460
+and for my operator
+
+102
+00:06:33,869 --> 00:06:36,132
+i'm in a select is empty
+
+103
+00:06:41,141 --> 00:06:42,168
+click finish
+
+104
+00:06:43,150 --> 00:06:44,117
+and okay
+
+105
+00:06:46,763 --> 00:06:48,201
+i can save that
+
+106
+00:06:48,451 --> 00:06:49,816
+workflow if i would like
+
+107
+00:06:55,072 --> 00:06:59,455
+next are gonna drag and exclusion activity from the targeting palette
+
+108
+00:07:01,493 --> 00:07:02,867
+so exclusion
+
+109
+00:07:03,451 --> 00:07:04,349
+drag that
+
+110
+00:07:04,757 --> 00:07:07,784
+and i'm gonna attach it to my intersection
+
+111
+00:07:08,661 --> 00:07:16,096
+and i am also going to attach my blacklisted email address or email is empty query to the exclusion activity
+
+112
+00:07:19,003 --> 00:07:24,128
+now we just covered in the slides that you must edit the exclusion activity
+
+113
+00:07:24,534 --> 00:07:26,873
+so we must double click on this
+
+114
+00:07:27,163 --> 00:07:30,153
+and select the primary group that we are keeping
+
+115
+00:07:32,510 --> 00:07:35,279
+so the primary set going to click the drop down arrow
+
+116
+00:07:36,306 --> 00:07:41,268
+i don't want to keep the people who are blacklisted or whose email is empty
+
+117
+00:07:41,491 --> 00:07:48,079
+i in fact want to keep the men under thirty who live in either new york or la so that's my intersection group
+
+118
+00:07:48,639 --> 00:07:51,081
+sentinel ct intersection
+
+119
+00:07:59,283 --> 00:08:00,511
+and click ok
+
+120
+00:08:03,858 --> 00:08:06,223
+and then i'm gonna restart that workflow
+
+121
+00:08:11,769 --> 00:08:12,500
+click yes
+
+122
+00:08:20,466 --> 00:08:22,969
+and it looks like we've dropped two people
+
+123
+00:08:23,553 --> 00:08:23,955
+
+124
+00:08:24,320 --> 00:08:30,098
+if i wanted to see who was dropped i could bring that information in by including
+
+125
+00:08:30,221 --> 00:08:31,676
+the compliment
+
+126
+00:08:31,835 --> 00:08:34,116
+so i could doubleclick on my exclusion
+
+127
+00:08:35,379 --> 00:08:37,668
+check the box to generate the compliment
+
+128
+00:08:38,788 --> 00:08:39,954
+click ok
+
+129
+00:08:40,759 --> 00:08:42,889
+and i could restart this workflow
+
+130
+00:08:49,385 --> 00:08:52,805
+and i could see who is in the complement group
+
+131
+00:08:53,021 --> 00:08:56,182
+by then right clicking on this transition arrow
+
+132
+00:08:56,441 --> 00:08:57,813
+displaying the target
+
+133
+00:08:58,673 --> 00:09:04,329
+and i could see in fact that joe parker and francis jimenez have been excluded
+
+134
+00:09:05,435 --> 00:09:07,483
+i could always configure my list
+
+135
+00:09:08,108 --> 00:09:09,343
+to bring in
+
+136
+00:09:09,649 --> 00:09:10,517
+age
+
+137
+00:09:11,395 --> 00:09:12,380
+gender
+
+138
+00:09:13,363 --> 00:09:14,146
+email
+
+139
+00:09:17,892 --> 00:09:19,524
+and by deduction
+
+140
+00:09:19,919 --> 00:09:23,955
+i can see that i have joe parker's email address
+
+141
+00:09:24,329 --> 00:09:26,114
+so he must have been dropped
+
+142
+00:09:26,536 --> 00:09:30,248
+because he has opted out of our marketing communications
+
+143
+00:09:30,515 --> 00:09:32,856
+so he is considered to be blacklisted
+
+144
+00:09:33,457 --> 00:09:40,484
+i could then if i wanted to go verify by looking at joe parker's actual recipient account if i wanted to
+
+145
+00:09:42,068 --> 00:09:45,623
+francis jimenez i can see i'm missing his email
+
+146
+00:09:45,910 --> 00:09:46,555
+so 
+
+147
+00:09:46,697 --> 00:09:50,389
+he most likely was dropped because we don't have his email address
+
+148
+00:09:53,924 --> 00:09:58,911
+so that concludes exercise four part five
+
+149
+00:10:01,420 --> 00:10:03,507
+one
+

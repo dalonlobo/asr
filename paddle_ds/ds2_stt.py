@@ -8,6 +8,10 @@ import argparse
 import functools
 import pandas as pd
 import numpy as np
+import logging
+import sys
+import pickle
+import datetime
 import paddle.v2 as paddle
 
 from data_utils.data import DataGenerator
@@ -167,7 +171,22 @@ def main():
 
 
 if __name__ == '__main__':
-    start_time = timer()
-    main()
-    total_time = timer() - start_time
-    print('Entire program ran in %0.3f minutes.' % (total_time / 60))
+    try:
+        logs_path = os.path.basename(__file__) + ".logs"
+        logging.basicConfig(filename=logs_path,
+            filemode='a',
+            format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
+            datefmt='%H:%M:%S',
+            level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
+        print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
+        print("Run the following command to view logs:\n", file=sys.stderr)
+        print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
+        start_time = timer()
+        main()
+        total_time = timer() - start_time
+        print('Entire program ran in %0.3f minutes.' % (total_time / 60))
+        sys.exit(0)
+    except Exception as e:
+        logger.exception(e)
+        sys.exit(-1)

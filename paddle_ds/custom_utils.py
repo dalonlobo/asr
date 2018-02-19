@@ -44,7 +44,7 @@ def run_command(command):
                          close_fds=(sys.platform != 'win32'))
     output = p.communicate()
     logger.debug("Execution completed: " + command[:30] + "...")
-    return output
+    return p.returncode, output
 
 def convert_to_ms(st):
     """Converts the subtitle time to millisecond"""

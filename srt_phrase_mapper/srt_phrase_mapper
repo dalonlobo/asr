@@ -1,0 +1,88 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Feb 14 16:38:22 2018
+
+@author: dalonlobo
+"""
+
+from __future__ import absolute_import, division, \
+                        print_function, unicode_literals
+import os
+import sys
+import argparse
+import logging
+import json
+import pysrt
+import collections
+
+logger = logging.getLogger("__main__") 
+
+def convert_to_ms(st):
+    """Converts the subtitle time to millisecond"""
+    return (st.hours * 60 * 60) + (st.minutes * 60) +\
+                  (st.seconds)
+
+if __name__ == "__main__":
+    """
+    :input:
+        srt_file: Path to srt file
+        phrases_file: Path to phrases json file
+            FORMAT: ["phrase 1", "phrase 2"]]
+            Example: [
+                        "i could restart", 
+                        "most likely", 
+                        "by deduction"
+                      ]
+    :output:
+        json with phrases as key and (Start, endtime) as value
+    :run:
+        python srt_phrase_mapper.py --srt_file test.srt --phrases_file phrases.list
+    """
+    logs_path = os.path.basename(__file__) + ".logs"
+    logging.basicConfig(filename=logs_path,
+        filemode='a',
+        format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
+        datefmt='%H:%M:%S',
+        level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    try:
+        print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
+        print("Run the following command to view logs:\n", file=sys.stderr)
+        print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
+        parser = argparse.ArgumentParser(description="Classifier")
+        parser.add_argument('--srt_file', type=str,  
+                            help='Path to srt file')
+        parser.add_argument('--phrases_file', type=str,  
+                    help='Path to file with phrases to match')
+        args = parser.parse_args()    
+        logger.info("#########################")
+        logger.info(".....Starting program....")
+        logger.info("#########################")
+        print("#########################", file=sys.stderr)
+        print(".....Starting program....", file=sys.stderr)
+        print("#########################", file=sys.stderr)
+              
+        # Read the phrases file
+        with open(args.phrases_file, "r") as f:
+            phrases_list = json.load(f)
+        output_json = collections.defaultdict(list)
+        # Read the srt file
+        subtitles = pysrt.open(args.srt_file)
+        for index, subtitle in enumerate(subtitles):
+            for phrase in phrases_list:
+                if phrase in subtitle.text:
+                    output_json[phrase].append(convert_to_ms(subtitle.start))
+        with open("output.json", "w") as f:
+            json.dump(output_json, f)
+    except Exception as e:
+        logger.exception(e)
+        print("Exception has occured, check the logs", file=sys.stderr)
+    finally:
+        logger.info("#########################")
+        logger.info(".....Exiting program.....")
+        logger.info("#########################")
+        print("#########################", file=sys.stderr)
+        print(".....Exiting program.....", file=sys.stderr)
+        print("#########################", file=sys.stderr)
+
