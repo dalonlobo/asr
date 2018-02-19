@@ -9,10 +9,17 @@ Created on Thu Feb  8 15:32:37 2018
 import glob
 import os
 import shutil
+import argparse
 
-path = "/home/dalonlobo/paddle/DeepSpeech/OneDrive_1_08-02-2018/Skill2"
+parser = argparse.ArgumentParser(description="gather srt")
+parser.add_argument('--srcpath', type=str,  
+                    help='Path to the folder')
+parser.add_argument('--dest_path', type=str,  
+                    help='Path to the dest folder')
+args = parser.parse_args()
 
-dest_directory = "Skill2_srts"
+path = args.srcpath
+dest_directory = args.dest_path
 
 if not os.path.exists(dest_directory):
     os.mkdir(dest_directory)
