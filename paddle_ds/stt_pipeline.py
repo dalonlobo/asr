@@ -50,8 +50,8 @@ def stt(srcpath):
     "--use_gru=True --share_rnn_weights=False --specgram_type='linear' "+\
     "--mean_std_path=/Deepspeech/mean_std.npz "+\
     "--vocab_path=/Deepspeech/vocab.txt "+\
-    "--lang_model_path=/DeepSpeech/common_crawl_00.prune01111.trie.klm "+\
-    "--model_path=/DeepSpeech/params.tar.gz "+\
+    "--lang_model_path=/Deepspeech/common_crawl_00.prune01111.trie.klm "+\
+    "--model_path=/Deepspeech/params.tar.gz "+\
     "--src_path=" + srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
