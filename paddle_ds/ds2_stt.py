@@ -69,6 +69,9 @@ add_arg('specgram_type',    str,
 add_arg('src_path',   str,
         'Videos',
         "Filepath of all Videos folder.")
+add_arg('manifest_path',   str,
+        'manifest.txt',
+        "Path to manifest file")
 # yapf: disable
 args = parser.parse_args()
 
@@ -130,7 +133,7 @@ def evaluate():
         if not os.path.isdir(parentdir):
             continue # If its not directory, just continue
         print("Working on {}/{} Video".format(index+1,number_of_videos))
-        manifest_path = os.path.join(parentdir, "manifest.txt")
+        manifest_path = args.manifest_path
         print(parentdir)
         manifest = read_manifest(
             manifest_path=manifest_path)
