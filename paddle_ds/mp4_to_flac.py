@@ -52,13 +52,9 @@ if __name__ == "__main__":
         args = parser.parse_args()
         srcpath = os.path.abspath(args.srcpath)
         logger.debug("Reading the files: \n")
-        for dirs in os.listdir(srcpath):
-            vid_directory = os.path.join(srcpath, dirs)
-            if not os.path.isdir(vid_directory):
-                continue # If its not directory, just continue
-            for file_name in glob.glob(vid_directory + os.path.sep + "*.mp4"):
-                logger.info("Passing: " + file_name)
-                convert_video_to_audio(file_name)
+        for file_name in glob.glob(srcpath + os.path.sep + "*.mp4"):
+            logger.info("Passing: " + file_name)
+            convert_video_to_audio(file_name)
         logger.info("All mp4 converted")
         print("All mp4 converted", file=sys.stderr)
         logger.info("#########################")
