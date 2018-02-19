@@ -52,6 +52,7 @@ def stt(srcpath):
     "--vocab_path=/Deepspeech/vocab.txt "+\
     "--lang_model_path=/Deepspeech/common_crawl_00.prune01111.trie.klm "+\
     "--model_path=/Deepspeech/params.tar.gz "+\
+    "--manifest_path="+srcpath+"/manifest.txt"+\
     "--src_path=" + srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
