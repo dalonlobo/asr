@@ -7,3 +7,6 @@
 -> Split the wav on silence using                   split_on_silence.py
 -> Call cris api on all split files                 ds2_stt.py
 -> To create srt files of the output                create_srt.py
+
+**Steps to run the entire pipeline**
+-> python stt_pipeline.py --videoid xxxxx
