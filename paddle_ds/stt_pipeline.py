@@ -48,10 +48,10 @@ def stt(srcpath):
     cmd = "CUDA_VISIBLE_DEVICES=0 python /Deepspeech/ds2_stt.py --trainer_count 1 "+\
     "--num_conv_layers=2 --num_rnn_layers=3 --rnn_layer_size=1024 "+\
     "--use_gru=True --share_rnn_weights=False --specgram_type='linear' "+\
-    "--mean_std_path=/Deepspeech/baidu_en8k_model/mean_std.npz "+\
-    "--vocab_path=/Deepspeech/baidu_en8k_model/vocab.txt "+\
+    "--mean_std_path=/Deepspeech/mean_std.npz "+\
+    "--vocab_path=/Deepspeech/vocab.txt "+\
     "--lang_model_path=/DeepSpeech/common_crawl_00.prune01111.trie.klm "+\
-    "--model_path=/DeepSpeech/baidu_en8k_model/params.tar.gz "+\
+    "--model_path=/DeepSpeech/params.tar.gz "+\
     "--src_path=" + srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
@@ -87,6 +87,7 @@ if __name__ == "__main__":
         parser.add_argument('--videoid', type=str,  
                             help='Youtube video Id')
         args = parser.parse_args()    
+        logger.info("Starting the program")
         # Path to the destination folder, where videos will be saved 
         dest_path = os.path.abspath("tmp")
         if not os.path.exists(dest_path):
