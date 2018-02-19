@@ -20,7 +20,7 @@ def download_video(videoid, dest_path):
     """
     Download the video
     """
-    cmd = 'python download_from_youtube.py --videoid '+videoid\
+    cmd = 'python /Deepspeech/download_from_youtube.py --videoid '+videoid\
             +' --dest_path ' + dest_path
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
@@ -29,7 +29,7 @@ def mp4_to_flac(srcpath):
     """
     Convert mp4 files to flac
     """
-    cmd = 'python mp4_to_flac.py --srcpath '+srcpath
+    cmd = 'python /Deepspeech/mp4_to_flac.py --srcpath '+srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
 
@@ -37,7 +37,7 @@ def split_on_silence(srcpath):
     """
     Split on silence
     """
-    cmd = 'python split_on_silence.py --srcpath '+srcpath
+    cmd = 'python /Deepspeech/split_on_silence.py --srcpath '+srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
 
@@ -45,7 +45,7 @@ def stt(srcpath):
     """
     Deep Speech
     """
-    cmd = "CUDA_VISIBLE_DEVICES=0 python ds2_stt.py --trainer_count 1 "+\
+    cmd = "CUDA_VISIBLE_DEVICES=0 python /Deepspeech/ds2_stt.py --trainer_count 1 "+\
     "--num_conv_layers=2 --num_rnn_layers=3 --rnn_layer_size=1024 "+\
     "--use_gru=True --share_rnn_weights=False --specgram_type='linear' "+\
     "--mean_std_path=/Deepspeech/baidu_en8k_model/mean_std.npz "+\
@@ -60,7 +60,7 @@ def create_srt(srcpath):
     """
     Create srt
     """
-    cmd = 'python create_srt.py --srcpath '+srcpath
+    cmd = 'python /Deepspeech/create_srt.py --srcpath '+srcpath
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
 
