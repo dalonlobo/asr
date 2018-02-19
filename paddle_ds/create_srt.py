@@ -64,15 +64,12 @@ if __name__ == "__main__":
         args = parser.parse_args()
         srcpath = os.path.abspath(args.srcpath)
         logger.debug("Reading the files: \n")
-        for dirs in os.listdir(srcpath):
-            vid_directory = os.path.join(srcpath, dirs)
-            if not os.path.isdir(vid_directory):
-                continue # If its not directory, just continue
-            split_df = os.path.join(vid_directory, "split_durations.csv")
-            ds2_stt_df = os.path.join(vid_directory, "ds2_stt_complete.csv")
-            print("Reading files:")
-            print(split_df, ds2_stt_df, sep="\n")
-            create_srt(split_df, ds2_stt_df)
+        vid_directory = os.path.join(srcpath)
+        split_df = os.path.join(vid_directory, "split_durations.csv")
+        ds2_stt_df = os.path.join(vid_directory, "ds2_stt_complete.csv")
+        print("Reading files:")
+        print(split_df, ds2_stt_df, sep="\n")
+        create_srt(split_df, ds2_stt_df)
         logger.info("All srt converted")
         print("All srt converted", file=sys.stderr)
         logger.info("#########################")
