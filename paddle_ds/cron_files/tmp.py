@@ -97,8 +97,7 @@ with IDisposable(document_client.DocumentClient(HOST, \
                                                 {'masterKey': MASTER_KEY})) as client:    
     documentlist = client.ReadDocuments(job_collection_link)
     for doc in documentlist:
-        print()
-        print(doc)
+        print(doc["videoid"],doc["status"],doc["message"])
 
 # Use this very carefully
 with IDisposable(document_client.DocumentClient(HOST, \

@@ -87,7 +87,7 @@ if __name__ == "__main__":
         logging.basicConfig(filename=logs_path,
             filemode='a',
             format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
-            datefmt='%H:%M:%S',
+            datefmt='%Y-%m-%d %H:%M:%S',
             level=logging.DEBUG)
         logger = logging.getLogger(__name__)
         print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
