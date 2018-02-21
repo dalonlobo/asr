@@ -46,6 +46,7 @@ def run_command(command):
                          stdout=subprocess.PIPE, 
                          stderr=subprocess.PIPE,
                          close_fds=(sys.platform != 'win32'))
+    output = p.communicate()
     logger.debug("Execution completed")
     return p.returncode, output
 
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     :Run: python cron_for_stt.py --conf_path conf.json
     """
     try:
-        logs_path = os.path.basename(__file__) + ".logs"
+        logs_path = "/tmp/"+os.path.basename(__file__) + ".logs"
         logging.basicConfig(filename=logs_path,
             filemode='a',
             format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
@@ -92,12 +93,13 @@ if __name__ == "__main__":
         print("Logs are in ", os.path.abspath(logs_path), file=sys.stderr)
         print("Run the following command to view logs:\n", file=sys.stderr)
         print("tail -f {}".format(os.path.abspath(logs_path)), file=sys.stderr)
-        parser = argparse.ArgumentParser(description="mp4 to wav")
+        logger.info("Starting the cron job")
+        parser = argparse.ArgumentParser(description="Cron job setup")
         parser.add_argument('--conf_path', type=str,  
                             help='path to configuration file')
         args = parser.parse_args()
         # Number of requests to process in 1 job
-        MAX_DOCUMENTS_TO_PROCESS = 2 
+        MAX_DOCUMENTS_TO_PROCESS = 4 
         # Read the configuration file
         with open(args.conf_path, "r") as f:
             conf = json.load(f)

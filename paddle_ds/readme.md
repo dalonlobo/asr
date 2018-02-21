@@ -10,3 +10,6 @@
 
 **Steps to run the entire pipeline**
 -> python stt_pipeline.py --videoid xxxxx
+
+**Steps to insert the request into cosmosdb**
+-> python request_stt.py --conf_path config.json --videoid U41RQaZ1Uqg --storage_type youtube
