@@ -11,12 +11,13 @@ import os
 import sys
 import argparse
 import logging
+import shutil
 
 from custom_utils import run_command
 
 logger = logging.getLogger("__main__")
 
-def download_video(videoid, dest_path):
+def download_youtube_video(videoid, dest_path):
     """
     Download the video
     """
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     :input:
         videoid : video id of youtube video
     :run:
-        python stt_pipeline.py --videoid FmlPvVOR35k
+        python stt_pipeline.py --videoid FmlPvVOR35k --storage_type youtube
     """
     try:
         logs_path = os.path.basename(__file__) + ".logs"
@@ -93,6 +94,8 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="Speech to text")
         parser.add_argument('--videoid', type=str,  
                             help='Youtube video Id')
+        parser.add_argument('--storage_type', type=str,  
+                            help='Youtube video Id')
         args = parser.parse_args()    
         logger.info("Starting the program")
         # Path to the destination folder, where videos will be saved 
@@ -101,10 +104,13 @@ if __name__ == "__main__":
             logger.info("Creating the directory: " + dest_path)
             os.makedirs(dest_path)
         video_path = os.path.join(dest_path, args.videoid)
-        exit_code, output = download_video(args.videoid, dest_path)
-        logger.info("Video downloaded with the status code {}".format(exit_code))
-        if exit_code != 0:
-            raise Exception("Error in video downloading")
+        if args.storage_type.lower() == "youtube":
+            exit_code, output = download_youtube_video(args.videoid, dest_path)
+            logger.info("Video downloaded with the status code {}".format(exit_code))
+            if exit_code != 0:
+                raise Exception("Error in video downloading")
+        else:
+            raise Exception("Please pass the storage type (youtube|blob)")
             
         # Convert mp4 to flac
         exit_code, output = mp4_to_flac(video_path)
@@ -129,6 +135,21 @@ if __name__ == "__main__":
         logger.info("create_srt.py exited with the status code {}".format(exit_code))
         if exit_code != 0:
             raise Exception("Error in srt creation")  
+        
+        # save the srt to dest folder
+        logger.info("Saving the srt to dest folder")
+        src = video_path + os.path.sep + args.videoid + +"_stt_converted.srt"
+        dst = dest_path + os.path.sep + args.videoid + +"_stt_converted.srt"
+        shutil.copy(src, dst)
+        if exit_code != 0:
+            raise Exception("Error while saving the file to dest folder")
+        
+        # cleanup
+        try:
+            shutil.rmtree(video_path)
+        except Exception as e:
+            logger.exception(e)
+            pass
         
         logger.info("ASR successful".format(args.videoid))
         print("ASR successful", file=sys.stderr)

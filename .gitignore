@@ -117,3 +117,4 @@ nohup.out
 Videos_verified
 tem
 paddle_ds/Videos
+paddle_ds/cron_files/config.json
