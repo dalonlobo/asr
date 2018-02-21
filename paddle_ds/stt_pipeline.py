@@ -146,13 +146,6 @@ if __name__ == "__main__":
             logger.exception(e)
             raise Exception("Error while saving the file to dest folder")
         
-        # cleanup
-        try:
-            shutil.rmtree(video_path)
-        except Exception as e:
-            logger.exception(e)
-            pass
-        
         logger.info("ASR successful".format(args.videoid))
         print("ASR successful", file=sys.stderr)
         logger.info("############################################")
@@ -163,4 +156,11 @@ if __name__ == "__main__":
     except Exception as e:
         logger.exception(e)
         sys.exit(-1)
+    finally:
+        # cleanup
+        try:
+            shutil.rmtree(video_path)
+        except Exception as e:
+            logger.exception(e)
+            pass
 
