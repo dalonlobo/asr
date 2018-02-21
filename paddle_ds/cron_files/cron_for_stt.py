@@ -113,6 +113,7 @@ if __name__ == "__main__":
         for i in range(MAX_DOCUMENTS_TO_PROCESS):
             with IDisposable(document_client.DocumentClient(HOST, \
                                                     {'masterKey': MASTER_KEY})) as client:   
+                logger.debug("Reading from db")
                 options = {} 
                 options['maxItemCount'] = 1
                 query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0'"
@@ -125,6 +126,7 @@ if __name__ == "__main__":
                                  "message": "Processing request",
                                  "id": doc["id"]}
                     # Update the status to 1 
+                    logger.debug("Processing {}".format(doc["videoid"]))
                     updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                     try:
                         logger.info("Running asr on".format(doc["videoid"]))
