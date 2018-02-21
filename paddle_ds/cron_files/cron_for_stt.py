@@ -46,8 +46,7 @@ def run_command(command):
                          stdout=subprocess.PIPE, 
                          stderr=subprocess.PIPE,
                          close_fds=(sys.platform != 'win32'))
-    output = p.communicate()
-    logger.debug("Execution completed: " + command[:30] + "...")
+    logger.debug("Execution completed")
     return p.returncode, output
 
 def run_asr(videoid, storage_type):
@@ -144,6 +143,7 @@ if __name__ == "__main__":
                             videoJSON["message"] = "Video is transcribed successfully"
                             updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                     except Exception as e:
+                        logger.exception(e)
                         # Update the status to -1
                         videoJSON["status"] = "-1"
                         videoJSON["message"] = "ASR creating failed"
