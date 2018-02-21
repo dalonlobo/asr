@@ -48,7 +48,7 @@ if __name__ == "__main__":
         python download_from_youtube.py --videoid FmlPvVOR35k --dest_path temp
     """
     try:
-        logs_path = os.path.basename(__file__) + ".logs"
+        logs_path = "/Deepspeech/"+os.path.basename(__file__) + ".logs"
         logging.basicConfig(filename=logs_path,
             filemode='a',
             format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
