@@ -81,7 +81,7 @@ if __name__ == "__main__":
         python stt_pipeline.py --videoid FmlPvVOR35k --storage_type youtube
     """
     try:
-        logs_path = os.path.basename(__file__) + ".logs"
+        logs_path = "/Deepspeech/"+os.path.basename(__file__) + ".logs"
         logging.basicConfig(filename=logs_path,
             filemode='a',
             format='%(asctime)s [%(name)s:%(levelname)s] [%(filename)s:%(funcName)s] #%(lineno)d: %(message)s',
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         args = parser.parse_args()    
         logger.info("Starting the program")
         # Path to the destination folder, where videos will be saved 
-        dest_path = os.path.abspath("tmp")
+        dest_path = os.path.abspath("/Deepspeech/tmp")
         if not os.path.exists(dest_path):
             logger.info("Creating the directory: " + dest_path)
             os.makedirs(dest_path)
@@ -138,10 +138,12 @@ if __name__ == "__main__":
         
         # save the srt to dest folder
         logger.info("Saving the srt to dest folder")
-        src = video_path + os.path.sep + args.videoid + +"_stt_converted.srt"
-        dst = dest_path + os.path.sep + args.videoid + +"_stt_converted.srt"
-        shutil.copy(src, dst)
-        if exit_code != 0:
+        src = video_path + os.path.sep + args.videoid +"_stt_converted.srt"
+        dst = dest_path + os.path.sep + args.videoid + "_stt_converted.srt"
+        try:
+            shutil.copy(src, dst)
+        except Exception as e:
+            logger.exception(e)
             raise Exception("Error while saving the file to dest folder")
         
         # cleanup
