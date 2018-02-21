@@ -136,7 +136,7 @@ if __name__ == "__main__":
                         if exit_code != 0:
                             # Update the status to -1
                             videoJSON["status"] = "-1"
-                            videoJSON["message"] = "ASR creating failed"
+                            videoJSON["message"] = "STT failed"
                             updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                             raise Exception("Error in srt creation")
                         else:
@@ -148,7 +148,7 @@ if __name__ == "__main__":
                         logger.exception(e)
                         # Update the status to -1
                         videoJSON["status"] = "-1"
-                        videoJSON["message"] = "ASR creating failed"
+                        videoJSON["message"] = "STT failed"
                         updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                         raise Exception("Error in srt creation")
         logger.info("#########################")
