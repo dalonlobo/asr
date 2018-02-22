@@ -12,10 +12,75 @@ import sys
 import argparse
 import logging
 import shutil
+import json
 
+from azure.storage.blob import BlockBlobService
+from datetime import datetime
 from custom_utils import run_command
 
 logger = logging.getLogger("__main__")
+
+
+class AzureStorageInterface:
+
+
+    def __init__(self, AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY,\
+                 AZURE_DIRECTORY_NAME, AZURE_CONTAINER_NAME):
+        self.AZURE_ACCOUNT_KEY = AZURE_ACCOUNT_KEY
+        self.AZURE_ACCOUNT_NAME = AZURE_ACCOUNT_NAME
+        self.AZURE_DIRECTORY_NAME = AZURE_DIRECTORY_NAME
+        self.AZURE_CONTAINER_NAME = AZURE_CONTAINER_NAME        
+        self.block_blob_service = BlockBlobService(AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY)
+
+
+    def updateSRTFiles (self, videoid, srtFilePath):
+        #.2017-05-22T15:18:29.573
+        self.createBlob(videoid, srtFilePath)
+        print("Updated SRT file for videoid ", videoid, srtFilePath)
+        timedSRTFILEPATH = srtFilePath + '.' + str(datetime.utcnow().isoformat()[:-3])
+        shutil.copy(srtFilePath, timedSRTFILEPATH)
+        self.createBlob(videoid, timedSRTFILEPATH)
+        print("Updated SRT file for videoid ", videoid, timedSRTFILEPATH)        
+
+
+    def getVideoFilesFromAzureStorage(self, videoid, videodirpath):
+        videoblobname = self.AZURE_DIRECTORY_NAME + videoid + '/' + videoid + '.mp4'
+        if not os.path.exists(videodirpath):
+            os.makedirs(videodirpath)
+        videopath =  videodirpath + videoid + '.mp4'
+        if self.block_blob_service.exists(self.AZURE_CONTAINER_NAME, videoblobname):
+            self.getBlob(videoblobname, videopath)
+        if os.path.exists (videopath):
+            return True, videopath
+        else:
+            return False, ''
+
+
+    def isSRTExist(self, videoid):
+        srtblobname =  self.AZURE_DIRECTORY_NAME + videoid + '/' + videoid + '.en.srt'
+        issrtexist = self.block_blob_service.exists(self.AZURE_CONTAINER_NAME, srtblobname)
+        return issrtexist
+    
+
+    def isVideoExist(self, videoid):
+        videoblobname =  self.AZURE_DIRECTORY_NAME + videoid + '/' + videoid + ".mp4"
+        isvideoexist = self.block_blob_service.exists(self.AZURE_CONTAINER_NAME, videoblobname)
+        return isvideoexist
+
+
+    def deleteBlob(self, blobname):
+        self.block_blob_service.delete_blob(self.AZURE_CONTAINER_NAME, blobname)
+
+
+    def getBlob(self, blobname, filepath):
+        self.block_blob_service.get_blob_to_path(self.AZURE_CONTAINER_NAME, blobname,filepath)
+        
+
+    def createBlob(self, videoid, filepath):
+        path, filename = os.path.split(filepath)
+        blobname = self.AZURE_DIRECTORY_NAME + videoid + '/' + filename 
+        self.block_blob_service.create_blob_from_path(self.AZURE_CONTAINER_NAME, blobname, filepath)
+
 
 def download_youtube_video(videoid, dest_path):
     """
@@ -77,8 +142,10 @@ if __name__ == "__main__":
         5. Create the srt file
     :input:
         videoid : video id of youtube video
+        storage_type: youtube or blob
+        conf_path: path to the configuration file
     :run:
-        python stt_pipeline.py --videoid FmlPvVOR35k --storage_type youtube
+        python stt_pipeline.py --videoid FmlPvVOR35k --storage_type youtube --conf_path conf.json
     """
     try:
         logs_path = "/Deepspeech/"+os.path.basename(__file__) + ".logs"
@@ -96,21 +163,42 @@ if __name__ == "__main__":
                             help='Youtube video Id')
         parser.add_argument('--storage_type', type=str,  
                             help='Youtube video Id')
+        parser.add_argument('--conf_path', type=str,  
+                            help='Path to configuration file')
         args = parser.parse_args()    
         logger.info("Starting the program")
         # Path to the destination folder, where videos will be saved 
         dest_path = os.path.abspath("/Deepspeech/tmp")
+        # Read the configuration file
+        with open(args.conf_path, "r") as f:
+            conf = json.load(f)
+            AZURE_CONTAINER_NAME = conf["AZURE_CONTAINER_NAME"]
+            AZURE_DIRECTORY_NAME = conf["AZURE_DIRECTORY_NAME"]
+            AZURE_ACCOUNT_NAME = conf["AZURE_ACCOUNT_NAME"]
+            AZURE_ACCOUNT_KEY = conf["AZURE_ACCOUNT_KEY"]
+        
         if not os.path.exists(dest_path):
             logger.info("Creating the directory: " + dest_path)
             os.makedirs(dest_path)
         video_path = os.path.join(dest_path, args.videoid)
-        if args.storage_type.lower() == "youtube":
-            exit_code, output = download_youtube_video(args.videoid, dest_path)
-            logger.info("Video downloaded with the status code {}".format(exit_code))
-            if exit_code != 0:
-                raise Exception("Error in video downloading")
-        else:
-            raise Exception("Please pass the storage type (youtube|blob)")
+        if not os.path.exists(video_path):
+            logger.info("Creating the directory: " + video_path)
+            os.makedirs(video_path)
+        
+        try:
+            # Initialize the AzureStorageInterface
+            blob_storage = AzureStorageInterface(AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY,\
+                                                 AZURE_DIRECTORY_NAME, AZURE_CONTAINER_NAME)
+            if blob_storage.isVideoExist(args.videoid):
+                blob_storage.getVideoFilesFromAzureStorage(args.videoid, video_path)
+            else:
+                exit_code, output = download_youtube_video(args.videoid, dest_path)
+                logger.info("Video downloaded with the status code {}".format(exit_code))
+                if exit_code != 0:
+                    raise Exception("Error in downloading video from youtube")                
+        except Exception as e:
+            logger.exception(e)
+            raise Exception("Error in blob storage section")                
             
         # Convert mp4 to flac
         exit_code, output = mp4_to_flac(video_path)
@@ -139,7 +227,7 @@ if __name__ == "__main__":
         # save the srt to dest folder
         logger.info("Saving the srt to dest folder")
         src = video_path + os.path.sep + args.videoid +"_stt_converted.srt"
-        dst = dest_path + os.path.sep + args.videoid + "_stt_converted.srt"
+        dst = dest_path + os.path.sep + args.videoid + ".en.srt"
         try:
             shutil.copy(src, dst)
         except Exception as e:
