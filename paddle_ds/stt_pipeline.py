@@ -190,6 +190,7 @@ if __name__ == "__main__":
             blob_storage = AzureStorageInterface(AZURE_ACCOUNT_NAME, AZURE_ACCOUNT_KEY,\
                                                  AZURE_DIRECTORY_NAME, AZURE_CONTAINER_NAME)
             if blob_storage.isVideoExist(args.videoid):
+                logger.info("Downloading from blob: " + args.videoid)
                 blob_storage.getVideoFilesFromAzureStorage(args.videoid, video_path)
             else:
                 exit_code, output = download_youtube_video(args.videoid, dest_path)
