@@ -50,12 +50,12 @@ def run_command(command):
     logger.debug("Execution completed")
     return p.returncode, output
 
-def run_asr(videoid, storage_type, conf_path):
+def run_asr(videoid, storage_type):
     """
     Run asr pipeline
     """
     cmd = "sudo nvidia-docker run -v /mnt/dalon/asr/paddle_ds:/Deepspeech dalonlobo/customdeepspeech2 python /Deepspeech/stt_pipeline.py --videoid "+\
-            videoid+" --storage_type "+storage_type+" --conf_path "+conf_path
+            videoid+" --storage_type "+storage_type+" --conf_path /Deepspeech/cron_files/config.json"
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                     updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                     try:
                         logger.info("Running asr on".format(doc["videoid"]))
-                        exit_code, output = run_asr(doc["videoid"], doc["storage_type"], args.conf_path)
+                        exit_code, output = run_asr(doc["videoid"], doc["storage_type"])
                         logger.info("run_asr exited with the status code {}".format(exit_code))
                         if exit_code != 0:
                             # Update the status to -1
