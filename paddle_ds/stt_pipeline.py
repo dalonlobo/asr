@@ -47,7 +47,7 @@ class AzureStorageInterface:
         videoblobname = self.AZURE_DIRECTORY_NAME + videoid + '/' + videoid + '.mp4'
         if not os.path.exists(videodirpath):
             os.makedirs(videodirpath)
-        videopath =  videodirpath + videoid + '.mp4'
+        videopath =  videodirpath + "/"+ videoid + '.mp4'
         if self.block_blob_service.exists(self.AZURE_CONTAINER_NAME, videoblobname):
             self.getBlob(videoblobname, videopath)
         if os.path.exists (videopath):
