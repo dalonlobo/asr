@@ -148,6 +148,7 @@ if __name__ == "__main__":
                             videoJSON["message"] = "Video is transcribed successfully"
                             updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                     except Exception as e:
+                        logger.error("Error while processing:"+doc["videoid"])
                         logger.exception(e)
                         # Update the status to -1
                         videoJSON["status"] = "-1"

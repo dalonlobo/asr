@@ -228,12 +228,19 @@ if __name__ == "__main__":
         # save the srt to dest folder
         logger.info("Saving the srt to dest folder")
         src = video_path + os.path.sep + args.videoid +"_stt_converted.srt"
-        dst = dest_path + os.path.sep + args.videoid + ".en.srt"
+        srt_dst = dest_path + os.path.sep + args.videoid + ".en.srt"
         try:
-            shutil.copy(src, dst)
+            shutil.copy(src, srt_dst)
         except Exception as e:
             logger.exception(e)
             raise Exception("Error while saving the file to dest folder")
+        
+        # Push the srt to blob storage
+        try:
+            blob_storage.updateSRTFiles(args.videoid, srt_dst)
+        except Exception as e:
+            logger.exception(e)
+            raise Exception("Failed to upload the srt to blob")
         
         logger.info("ASR successful".format(args.videoid))
         print("ASR successful", file=sys.stderr)

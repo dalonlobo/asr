@@ -87,10 +87,10 @@ client.QueryDocuments(job_collection_link, query_with_optional_parameters)
 options = {} 
 options['maxItemCount'] = 2
 query = """SELECT * FROM DeepSpeechJobQueueProduction t
-            WHERE t.status = '1'"""
+            WHERE t.videoid='3WX7bweJK-k'"""
 documentlist = client.QueryDocuments(job_collection_link, query, options)
 for doc in documentlist:
-    print(doc)
+    print(doc["videoid"],doc["status"],doc["message"])
 
 # Read from the db
 with IDisposable(document_client.DocumentClient(HOST, \
