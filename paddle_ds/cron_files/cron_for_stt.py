@@ -118,7 +118,9 @@ if __name__ == "__main__":
                 options = {} 
                 options['maxItemCount'] = 1
                 query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0'"
-                documentlist = client.QueryDocuments(job_collection_link, query, options)
+                documentlist = list(client.QueryDocuments(job_collection_link, query, options))
+                if len(documentlist) == 0:
+                    break
                 for doc in documentlist:
                     videoJSON = {"videoid": doc["videoid"],
                                  "videourl": doc["videourl"],
