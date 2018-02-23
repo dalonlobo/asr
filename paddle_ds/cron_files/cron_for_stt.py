@@ -125,7 +125,9 @@ if __name__ == "__main__":
                                               {'masterKey': MASTER_KEY})) as client:
                 logger.debug("Reading from db")
                 options = {} 
-                query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0' and t.priority='"+str(priority)+"'"
+                query = "SELECT TOP 10 * FROM "+DS_JOB_COLLECTION_ID\
+                    +" t WHERE t.status='0' and t.priority='"\
+                    +str(priority)+"'"+" ORDER BY t.timestamp ASC"
                 return list(client.QueryDocuments(job_collection_link, query, options))
     
         # Process the document
