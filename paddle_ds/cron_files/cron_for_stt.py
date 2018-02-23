@@ -14,6 +14,7 @@ import argparse
 import logging
 import json
 import subprocess
+import numpy as np
 import pydocumentdb.documents as documents
 import pydocumentdb.document_client as document_client
 import pydocumentdb.errors as errors
@@ -100,7 +101,7 @@ if __name__ == "__main__":
                             help='path to configuration file')
         args = parser.parse_args()
         # Number of requests to process in 1 job
-        MAX_DOCUMENTS_TO_PROCESS = 4 
+        MAX_DOCUMENTS_TO_PROCESS = 3 
         # Read the configuration file
         with open(args.conf_path, "r") as f:
             conf = json.load(f)
@@ -117,44 +118,46 @@ if __name__ == "__main__":
                                                     {'masterKey': MASTER_KEY})) as client:   
                 logger.debug("Reading from db")
                 options = {} 
-                options['maxItemCount'] = 1
                 query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0'"
                 documentlist = list(client.QueryDocuments(job_collection_link, query, options))
                 if len(documentlist) == 0:
                     break
-                for doc in documentlist:
-                    videoJSON = {"videoid": doc["videoid"],
-                                 "videourl": doc["videourl"],
-                                 "storage_type": doc["storage_type"],
-                                 "status": "1",
-                                 "message": "Processing request",
-                                 "id": doc["id"]}
-                    # Update the status to 1 
-                    logger.debug("Processing {}".format(doc["videoid"]))
-                    updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
-                    try:
-                        logger.info("Running asr on".format(doc["videoid"]))
-                        exit_code, output = run_asr(doc["videoid"], doc["storage_type"])
-                        logger.info("run_asr exited with the status code {}".format(exit_code))
-                        if exit_code != 0:
-                            # Update the status to -1
-                            videoJSON["status"] = "-1"
-                            videoJSON["message"] = "STT failed"
-                            updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
-                            raise Exception("Error in srt creation")
-                        else:
-                            # Update the status to 2
-                            videoJSON["status"] = "2"
-                            videoJSON["message"] = "Video is transcribed successfully"
-                            updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
-                    except Exception as e:
-                        logger.error("Error while processing:"+doc["videoid"])
-                        logger.exception(e)
+                # Only 1 document should be processed now to avoid overlap with next cron job
+                index_to_process = np.random.randint(0, len(documentlist))
+                #for doc in documentlist:
+                doc = documentlist[index_to_process]
+                videoJSON = {"videoid": doc["videoid"],
+                             "videourl": doc["videourl"],
+                             "storage_type": doc["storage_type"],
+                             "status": "1",
+                             "message": "Processing request",
+                             "id": doc["id"]}
+                # Update the status to 1 
+                logger.debug("Processing {}".format(doc["videoid"]))
+                updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
+                try:
+                    logger.info("Running asr on".format(doc["videoid"]))
+                    exit_code, output = run_asr(doc["videoid"], doc["storage_type"])
+                    logger.info("run_asr exited with the status code {}".format(exit_code))
+                    if exit_code != 0:
                         # Update the status to -1
                         videoJSON["status"] = "-1"
                         videoJSON["message"] = "STT failed"
                         updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                         raise Exception("Error in srt creation")
+                    else:
+                        # Update the status to 2
+                        videoJSON["status"] = "2"
+                        videoJSON["message"] = "Video is transcribed successfully"
+                        updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
+                except Exception as e:
+                    logger.error("Error while processing:"+doc["videoid"])
+                    logger.exception(e)
+                    # Update the status to -1
+                    videoJSON["status"] = "-1"
+                    videoJSON["message"] = "STT failed"
+                    updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
+                    raise Exception("Error in srt creation")
         logger.info("#########################")
         logger.info(".....Exiting program.....")
         logger.info("#########################")

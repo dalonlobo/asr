@@ -41,7 +41,7 @@ class AzureStorageInterface:
         if not os.path.exists(videodirpath):
             os.makedirs(videodirpath)
 
-        videopath =  videodirpath + videoid + '.mp4'
+        videopath =  videodirpath +"/"+ videoid + '.mp4'
         if self.block_blob_service.exists(AZURE_CONTAINER_NAME, videoblobname):
             self.getBlob(videoblobname, videopath)
         if os.path.exists (videopath):
@@ -77,6 +77,11 @@ class AzureStorageInterface:
         self.block_blob_service.create_blob_from_path(AZURE_CONTAINER_NAME, blobname, filepath)
     
 
+    def isVideoExist(self, videoid):
+        videoblobname =  AZURE_DIRECTORY_NAME + videoid + '/' + videoid + ".mp4"
+        isvideoexist = self.block_blob_service.exists(AZURE_CONTAINER_NAME, videoblobname)
+        return isvideoexist
+
 #allfiles = getFilteredFilesFromDirectory('/datadrive/videos/PLpherdrLyny8YN4M24iRJBMCXkLcGbmhY/7GfyRrPYKG0/')
 #print "filtered list is ", len(allfiles), allfiles
 
@@ -85,6 +90,9 @@ if __name__=='__main__':
     instance = AzureStorageInterface()
 
     instance.getVideoFilesFromAzureStorage('Xev-PDZh9qg', '/home/dalonlobo/deepspeech_models/asr/paddle_ds/tmp')
+
+    instance.isSRTExist('M8WOYjk7hKo')
+    instance.isVideoExist('M8WOYjk7hKo')
 #    instance.updateSRTFiles('3WX7bweJK-k','/home/kuldeep/Downloads/ekstep_srt_10/3WX7bweJK-k.en.srt')
 
     #pcdObj = instance.getJSONPhraseDataOutput('PWm2-4iAOIY')
