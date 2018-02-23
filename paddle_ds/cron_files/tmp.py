@@ -58,29 +58,29 @@ def createNewDocument(videoid):
                                                     {'masterKey': MASTER_KEY})) as client:
         videoJSON = {"videoid": videoid,
                      "videourl": "",
-                     "storage_type": "youtube",
+                     "storage_type": "blob",
                      "status": "0",
                      "message": ""}
         client.CreateDocument(job_collection_link, videoJSON, options=options) 
 
 
-def updateDocument(videoid):
-    # Write into the db
-    with IDisposable(document_client.DocumentClient(HOST, \
-                                                    {'masterKey': MASTER_KEY})) as client:
-        videoJSON = {"videoid": videoid,
-                     "videourl": "",
-                     "storage_type": "blob",
-                     "status": "0",
-                     "message": ""} 
-        videoJSON = {"status": "1", "id": "d45cef30-6805-400c-93b4-4ba9377f7f58"}
-        client.UpsertDocument(job_collection_link, videoJSON)
+#def updateDocument(videoid):
+#    # Write into the db
+#    with IDisposable(document_client.DocumentClient(HOST, \
+#                                                    {'masterKey': MASTER_KEY})) as client:
+#        videoJSON = {"videoid": videoid,
+#                     "videourl": "",
+#                     "storage_type": "blob",
+#                     "status": "0",
+#                     "message": ""} 
+#        videoJSON = {"status": "1", "id": "d45cef30-6805-400c-93b4-4ba9377f7f58"}
+#        client.UpsertDocument(job_collection_link, videoJSON)
 
         
 createNewDocument("test1")
-updateDocument("test1")
+#updateDocument("test1")
 
-client.QueryDocuments(job_collection_link, query_with_optional_parameters)
+#client.QueryDocuments(job_collection_link, query_with_optional_parameters)
 
 
 
@@ -91,13 +91,27 @@ query = """SELECT * FROM DeepSpeechJobQueueProduction t
 documentlist = client.QueryDocuments(job_collection_link, query, options)
 for doc in documentlist:
     print(doc["videoid"],doc["status"],doc["message"])
+    
+
+
+with IDisposable(document_client.DocumentClient(HOST, \
+                                                {'masterKey': MASTER_KEY})) as client:   
+    options = {} 
+    query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0' and t.priority='0'"
+    documentlist = list(client.QueryDocuments(job_collection_link, query, options))
+    for doc in documentlist:
+        print(doc["videoid"],doc["status"],doc["message"], doc["priority"], doc["timestamp"])
+
+
+# Command to insert into db
+#/home/dalonlobo/workspace/ppevenv/bin/ppevenv/ds/bin/python /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/request_stt.py --conf_path /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/config.json --storage_type blob --videoid y8j1HL5QCjA
 
 # Read from the db
 with IDisposable(document_client.DocumentClient(HOST, \
                                                 {'masterKey': MASTER_KEY})) as client:    
     documentlist = client.ReadDocuments(job_collection_link)
     for doc in documentlist:
-        print(doc["videoid"],doc["status"],doc["message"])
+        print(doc["videoid"],doc["status"],doc["message"], doc["priority"], doc["timestamp"])
 
 # Use this very carefully
 with IDisposable(document_client.DocumentClient(HOST, \
@@ -110,6 +124,13 @@ with IDisposable(document_client.DocumentClient(HOST, \
         print(doc["_self"])
 #        options['partitionKey'] = True
         client.DeleteDocument(doc["_self"], options=options)
+
+
+for v in x:
+    p =str(np.random.randint(0,3))
+    cmd = """/home/dalonlobo/workspace/ppevenv/bin/ppevenv/ds/bin/python /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/request_stt.py --conf_path /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/config.json --priority """+p+""" --storage_type blob --videoid """+v
+    print(cmd)
+    run_command(cmd)
 
 # Value of the document
 # {u'status': u'0', 

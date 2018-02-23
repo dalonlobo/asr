@@ -30,6 +30,7 @@ def convert_srt(file_name):
         for index, subtitle in enumerate(subtitles):
             sub = pre_process_srt(subtitle.text)
             f.write(sub + " " if sub else "")
+    print(os.path.join(abs_path,op_name),file=sys.stderr)
     logger.info("Done writing to text: " + file_name)
     
 
@@ -51,16 +52,18 @@ if __name__ == "__main__":
     parser.add_argument('--srcpath', type=str,  
                         help='Path to the folder containing srt files')
     # Remove the below line 
-    args = parser.parse_args(["--srcpath", "Videos"])
+#    args = parser.parse_args(["--srcpath", "Videos"])
     # Uncomment the below line
-    # args = parser.parse_args()
+    args = parser.parse_args()
     # Path to the source folder, where srt will be saved 
     srcpath = os.path.abspath(args.srcpath)
     logger.debug("Reading the files: \n")
     for dirs in os.listdir(srcpath):
         vid_directory = os.path.join(srcpath, dirs)
+        print(vid_directory, file=sys.stderr)
         if not os.path.isdir(vid_directory):
             continue # If its not directory, just continue
+        print("Searching for srt",file=sys.stderr)
         for file_name in glob.glob(vid_directory + os.path.sep + "*.srt"):
             logger.info("Passing: " + file_name)
             convert_srt(file_name)

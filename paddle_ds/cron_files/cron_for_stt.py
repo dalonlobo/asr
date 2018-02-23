@@ -19,6 +19,8 @@ import pydocumentdb.documents as documents
 import pydocumentdb.document_client as document_client
 import pydocumentdb.errors as errors
 
+from datetime import datetime
+
 logger = logging.getLogger("__main__")   
 
 class IDisposable:
@@ -74,6 +76,11 @@ if __name__ == "__main__":
              1: Processing
             -1: Failed to create srt
              2: completed
+        :priority: Priority at which the request is to be processed
+            0: Low
+            1: Medium
+            2: High
+        :timestamp: Timestamp at which it was created/updated
         :message: Error messages are put here
     Configuration json format:
         {
@@ -112,26 +119,27 @@ if __name__ == "__main__":
             database_link = 'dbs/' + DATABASE_ID
             job_collection_link = database_link + '/colls/' + DS_JOB_COLLECTION_ID
         
-        # Read from cosmosdb
-        for i in range(MAX_DOCUMENTS_TO_PROCESS):
+        # Get documents
+        def get_documents(priority):
             with IDisposable(document_client.DocumentClient(HOST, \
-                                                    {'masterKey': MASTER_KEY})) as client:   
+                                              {'masterKey': MASTER_KEY})) as client:
                 logger.debug("Reading from db")
                 options = {} 
-                query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0'"
-                documentlist = list(client.QueryDocuments(job_collection_link, query, options))
-                if len(documentlist) == 0:
-                    break
-                # Only 1 document should be processed now to avoid overlap with next cron job
-                index_to_process = np.random.randint(0, len(documentlist))
-                #for doc in documentlist:
-                doc = documentlist[index_to_process]
+                query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0' and t.priority='"+str(priority)+"'"
+                return list(client.QueryDocuments(job_collection_link, query, options))
+    
+        # Process the document
+        def process_doc(doc):
+            with IDisposable(document_client.DocumentClient(HOST, \
+                                                    {'masterKey': MASTER_KEY})) as client:
                 videoJSON = {"videoid": doc["videoid"],
-                             "videourl": doc["videourl"],
-                             "storage_type": doc["storage_type"],
-                             "status": "1",
-                             "message": "Processing request",
-                             "id": doc["id"]}
+                     "videourl": doc["videourl"],
+                     "storage_type": doc["storage_type"],
+                     "status": "1",
+                     "priority": doc["priority"],
+                     "timestamp": str(datetime.utcnow().isoformat()[:-3]),
+                     "message": "Processing request",
+                     "id": doc["id"]}
                 # Update the status to 1 
                 logger.debug("Processing {}".format(doc["videoid"]))
                 updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
@@ -158,6 +166,28 @@ if __name__ == "__main__":
                     videoJSON["message"] = "STT failed"
                     updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                     raise Exception("Error in srt creation")
+            
+        # process random
+        def process_random_doc(documentlist):
+            # Only 1 document should be processed now to avoid overlap with next cron job
+            index_to_process = np.random.randint(0, len(documentlist))
+            doc = documentlist[index_to_process]
+            process_doc(doc)            
+            
+        # Read from cosmosdb
+        for i in range(MAX_DOCUMENTS_TO_PROCESS):   
+            documentlist = get_documents(priority=2)
+            if len(documentlist) != 0:
+                process_random_doc(documentlist)
+                continue
+            documentlist = get_documents(priority=1)
+            if len(documentlist) != 0:
+                process_random_doc(documentlist)
+                continue
+            documentlist = get_documents(priority=0)
+            if len(documentlist) == 0:
+                break
+            process_random_doc(documentlist)
         logger.info("#########################")
         logger.info(".....Exiting program.....")
         logger.info("#########################")

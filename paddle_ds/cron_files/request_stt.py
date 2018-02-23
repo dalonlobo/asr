@@ -17,6 +17,8 @@ import pydocumentdb.documents as documents
 import pydocumentdb.document_client as document_client
 import pydocumentdb.errors as errors
 
+from datetime import datetime
+
 logger = logging.getLogger("__main__")   
 
 class IDisposable:
@@ -47,6 +49,11 @@ if __name__ == "__main__":
              1: Processing
             -1: Failed to create srt
              2: completed
+        :priority: Priority at which the request is to be processed
+            0: Low
+            1: Medium
+            2: High
+        :timestamp: Time at which added or modified
         :message: Error messages are put here
     Configuration json format:
         {
@@ -55,7 +62,7 @@ if __name__ == "__main__":
         "DATABASE_ID":"com.videoken.development.jobqueues",
         "DS_JOB_COLLECTION_ID":"DeepSpeechJobQueueProduction"
         }
-    :Run: python request_stt.py --conf_path config.json --videoid 123123 --storage_type youtube
+    :Run: python request_stt.py --conf_path config.json --priority 0 --storage_type youtube --videoid 123123
     """
     try:
         logs_path = os.path.basename(__file__) + ".logs"
@@ -75,6 +82,8 @@ if __name__ == "__main__":
                             help='videoid to be transcribed')
         parser.add_argument('--storage_type', type=str, default='blob',  
                             help='youtube or blob')
+        parser.add_argument('--priority', type=str, default='0',  
+                            help='0|1|2 where 0-Low,1-Medium,2-High')
         args = parser.parse_args()
         
         # Read the configuration file
@@ -87,7 +96,7 @@ if __name__ == "__main__":
             database_link = 'dbs/' + DATABASE_ID
             job_collection_link = database_link + '/colls/' + DS_JOB_COLLECTION_ID
         # Insert into the cosmos db
-        def createUpdateDocument(videoid, storage_type, videourl=""):
+        def createUpdateDocument(videoid, storage_type, priority, videourl=""):
             # Write into the db
             with IDisposable(document_client.DocumentClient(HOST, \
                                                             {'masterKey': MASTER_KEY})) as client:
@@ -95,6 +104,8 @@ if __name__ == "__main__":
                              "videourl": videourl,
                              "storage_type": storage_type,
                              "status": "0",
+                             "priority": priority,
+                             "timestamp": str(datetime.utcnow().isoformat()[:-3]),
                              "message": ""}
                 query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t  "+\
                         "WHERE t.videoid = '"+videoid+"'"
@@ -104,7 +115,7 @@ if __name__ == "__main__":
                     client.UpsertDocument(job_collection_link, videoJSON)
                 else:
                     client.CreateDocument(job_collection_link, videoJSON) 
-        createUpdateDocument(args.videoid, args.storage_type)
+        createUpdateDocument(args.videoid, args.storage_type, args.priority)
         logger.info("#########################")
         logger.info(".....Exiting program.....")
         logger.info("#########################")

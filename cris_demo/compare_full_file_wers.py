@@ -42,10 +42,10 @@ if __name__ == "__main__":
     parser.add_argument('--hyp', type=str,  
                         help='Path to hyp')
     # Remove the below line 
-    args = parser.parse_args(["--ref", "/home/dalonlobo/deepspeech_models/asr/cris_demo/Videos/XtiYlNM9jRc/XtiYlNM9jRc.en.srt.ref.txt",
-                              "--hyp", "/home/dalonlobo/deepspeech_models/asr/cris_demo/Videos/XtiYlNM9jRc/hyp.txt"])
+#    args = parser.parse_args(["--ref", "/home/dalonlobo/deepspeech_models/asr/cris_demo/Videos/XtiYlNM9jRc/XtiYlNM9jRc.en.srt.ref.txt",
+#                              "--hyp", "/home/dalonlobo/deepspeech_models/asr/cris_demo/Videos/XtiYlNM9jRc/hyp.txt"])
     # Uncomment the below line
-    # args = parser.parse_args()
+    args = parser.parse_args()
     ref = os.path.abspath(args.ref)
     hyp = os.path.abspath(args.hyp)
     logger.debug("Reading the files: \n")
