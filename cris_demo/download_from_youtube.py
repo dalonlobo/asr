@@ -84,11 +84,18 @@ def download_videos(destpath, allvideoids):
             op_path = os.path.join(destpath, videoid)
             if not os.path.exists(op_path):
                 os.makedirs(op_path)
-
-            cmd = 'youtube-dl' + " -o '" + os.path.join(op_path, videoid) +\
-                    ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
-                    "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
-                    "https://www.youtube.com/watch?v=" + videoid
+            # Download all the content
+#            cmd = 'youtube-dl' + " -o '" + os.path.join(op_path, videoid) +\
+#                    ".%(ext)s' -f mp4 --write-sub --sub-lang 'en' --convert-subs " + \
+#                    "srt --write-auto-sub --write-info-json --prefer-ffmpeg " + \
+#                    "https://www.youtube.com/watch?v=" + videoid
+            # Just to download srt
+#            cmd = "youtube-dl" + " -o '" + os.path.join(op_path, videoid) + ".%(ext)s' --skip-download " + \
+#                "--write-sub --sub-lang 'en' --convert-subs srt  --prefer-ffmpeg" \
+#                " https://www.youtube.com/watch?v=" + videoid
+            # Convert vtt to srt
+            cmd = "ffmpeg -i " + os.path.join(op_path, videoid) + ".en.vtt " \
+                + os.path.join(op_path, videoid) + ".en.srt"
             logger.debug('Built cmd: ' + cmd)
             run_command(cmd)
             logger.info('Video {} downloaded successfully'.format(videoid))

@@ -194,36 +194,36 @@ if __name__ == "__main__":
                 blob_storage.getVideoFilesFromAzureStorage(args.videoid, video_path)
             else:
                 exit_code, output = download_youtube_video(args.videoid, dest_path)
-                logger.info("Video downloaded with the status code {}".format(exit_code))
+                logger.info("Video {} downloaded with the status code {}".format(args.videoid,exit_code))
                 if exit_code != 0:
-                    raise Exception("Error in downloading video from youtube")                
+                    raise Exception("Error in downloading video {} from youtube".format(args.videoid))                
         except Exception as e:
             logger.exception(e)
-            raise Exception("Error in blob storage section")                
+            raise Exception("Error in blob storage section for video {}".format(args.videoid))                
             
         # Convert mp4 to flac
         exit_code, output = mp4_to_flac(video_path)
         logger.info("Mp4 to flac exited with the status code {}".format(exit_code))
         if exit_code != 0:
-            raise Exception("Error in converting mp4 to flac")
+            raise Exception("Error in converting video {} mp4 to flac".format(args.videoid))
             
         # split on silence
         exit_code, output = split_on_silence(video_path)
         logger.info("split on silence exited with the status code {}".format(exit_code))
         if exit_code != 0:
-            raise Exception("Error in spliting on silence")
+            raise Exception("Error in spliting on silence for video {}".format(args.videoid))
             
         # Use deepspeech 2
         exit_code, output = stt(video_path)
         logger.info("ds2_stt.py exited with the status code {}".format(exit_code))
         if exit_code != 0:
-            raise Exception("Error in deepspeech")        
+            raise Exception("Error in ds2_stt.py for video {}".format(args.videoid))        
 
         # create srt
         exit_code, output = create_srt(video_path)
         logger.info("create_srt.py exited with the status code {}".format(exit_code))
         if exit_code != 0:
-            raise Exception("Error in srt creation")  
+            raise Exception("Error in srt creation for video {}".format(args.videoid))  
         
         # save the srt to dest folder
         logger.info("Saving the srt to dest folder")
@@ -233,14 +233,14 @@ if __name__ == "__main__":
             shutil.copy(src, srt_dst)
         except Exception as e:
             logger.exception(e)
-            raise Exception("Error while saving the file to dest folder")
+            raise Exception("Error while saving the file to dest folder for video {}".format(args.videoid))
         
         # Push the srt to blob storage
         try:
             blob_storage.updateSRTFiles(args.videoid, srt_dst)
         except Exception as e:
             logger.exception(e)
-            raise Exception("Failed to upload the srt to blob")
+            raise Exception("Failed to upload the srt to blob for video {}".format(args.videoid))
         
         logger.info("ASR successful".format(args.videoid))
         print("ASR successful", file=sys.stderr)

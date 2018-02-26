@@ -94,14 +94,15 @@ for doc in documentlist:
     
 
 
-with IDisposable(document_client.DocumentClient(HOST, \
-                                                {'masterKey': MASTER_KEY})) as client:   
-    options = {} 
-    query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status='0' and t.priority='0'"
-    documentlist = list(client.QueryDocuments(job_collection_link, query, options))
-    for doc in documentlist:
-        print(doc["videoid"],doc["status"],doc["message"], doc["priority"], doc["timestamp"])
-
+def get_priority(status,priority):
+    with IDisposable(document_client.DocumentClient(HOST, \
+                                                    {'masterKey': MASTER_KEY})) as client:   
+        options = {} 
+        query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.status!='"+str(status)+"'"+" and t.priority='"+str(priority)+"'"
+        documentlist = list(client.QueryDocuments(job_collection_link, query, options))
+        for doc in documentlist:
+            print(doc["videoid"],doc["status"],doc["message"], doc["priority"], doc["timestamp"])
+    
 
 # Command to insert into db
 #/home/dalonlobo/workspace/ppevenv/bin/ppevenv/ds/bin/python /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/request_stt.py --conf_path /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/config.json --storage_type blob --videoid y8j1HL5QCjA
@@ -114,6 +115,7 @@ with IDisposable(document_client.DocumentClient(HOST, \
         print(doc["videoid"],doc["status"],doc["message"], doc["priority"], doc["timestamp"])
 
 # Use this very carefully
+############### Danger####################        
 with IDisposable(document_client.DocumentClient(HOST, \
                                                 {'masterKey': MASTER_KEY})) as client:    
     documentlist = client.ReadDocuments(job_collection_link)
@@ -124,13 +126,35 @@ with IDisposable(document_client.DocumentClient(HOST, \
         print(doc["_self"])
 #        options['partitionKey'] = True
         client.DeleteDocument(doc["_self"], options=options)
+############ Till Here #####################
 
+import sys
+import subprocess
+
+def run_command(command):
+    p = subprocess.Popen(command, bufsize=2048, shell=True, 
+                         stdin=subprocess.PIPE, 
+                         stdout=subprocess.PIPE, 
+                         stderr=subprocess.PIPE,
+                         close_fds=(sys.platform != 'win32'))
+    output = p.communicate()
+    return p.returncode, output
 
 for v in x:
     p =str(np.random.randint(0,3))
     cmd = """/home/dalonlobo/workspace/ppevenv/bin/ppevenv/ds/bin/python /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/request_stt.py --conf_path /home/dalonlobo/deepspeech_models/asr/paddle_ds/cron_files/config.json --priority """+p+""" --storage_type blob --videoid """+v
     print(cmd)
+    print()
     run_command(cmd)
+
+# calculate wer
+for v in x:
+    p =str(np.random.randint(0,3))
+    cmd = "/home/dalonlobo/workspace/ppevenv/bin/ppevenv/ds/bin/python compare_full_file_wers.py --ref ../paddle_ds/cron_files/tmp/41/"+v+"/"+v+".en.srt.ref.txt --hyp ../paddle_ds/cron_files/tmp/41/"+v+".en.srt.ref.txt"
+    print(cmd)
+    op = run_command(cmd)    
+    print(op)
+    print("\n\n")
 
 # Value of the document
 # {u'status': u'0', 
