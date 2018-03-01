@@ -69,19 +69,22 @@ def cris_stt(wav_folder, vid_directory):
     try:
         with open(os.path.join(vid_directory, 'transcripts_list_'+\
                                datetime.datetime.now().strftime("%H:%M:%S")+".b"), 'wb') as f:
-           pickle.dump(transcripts, f)
-    except:
+            pickle.dump(transcripts, f)
+    except Exception as e:
+        logger.exception(e)
         pass
     try:
         with open(os.path.join(vid_directory, 'cris_stt_df.xlsx'), 'w') as f:
             df.to_excel(f, index=False)
-    except:
+    except Exception as e:
+        logger.exception(e)
         pass    
     try:        
         with open(os.path.join(vid_directory, 'cris_hyp.txt'), 'w') as f:
             for trans in df["transcripts"]:
                 f.write(pre_process_srt(trans) + " ")
-    except:
+    except Exception as e:
+        logger.exception(e)
         pass
 
 if __name__ == "__main__":
