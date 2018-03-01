@@ -150,7 +150,7 @@ if __name__ == "__main__":
                         videoJSON["status"] = "-1"
                         videoJSON["message"] = "STT failed"
                         updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
-                        raise Exception("Error in srt creation")
+                        raise Exception("Error in asr")
                     else:
                         # Update the status to 2
                         videoJSON["status"] = "2"
@@ -163,7 +163,7 @@ if __name__ == "__main__":
                     videoJSON["status"] = "-1"
                     videoJSON["message"] = "STT failed"
                     updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
-                    raise Exception("Error in srt creation")
+                    raise Exception("Error in asr")
             
         # process random
         def process_random_doc(documentlist):
