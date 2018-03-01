@@ -13,6 +13,7 @@ import argparse
 import logging
 import shutil
 import json
+import re
 
 from azure.storage.blob import BlockBlobService
 from datetime import datetime
@@ -81,6 +82,10 @@ class AzureStorageInterface:
         blobname = self.AZURE_DIRECTORY_NAME + videoid + '/' + filename 
         self.block_blob_service.create_blob_from_path(self.AZURE_CONTAINER_NAME, blobname, filepath)
 
+def isYoutubeUrl(url):
+    pattern = "http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?"
+    return not re.match(pattern, url) is None
+
 
 def download_youtube_video(videoid, dest_path):
     """
@@ -142,10 +147,10 @@ if __name__ == "__main__":
         5. Create the srt file
     :input:
         videoid : video id of youtube video
-        storage_type: youtube or blob
+        videourl: url to the video
         conf_path: path to the configuration file
     :run:
-        python stt_pipeline.py --videoid FmlPvVOR35k --storage_type youtube --conf_path conf.json
+        python stt_pipeline.py --videoid FmlPvVOR35k --videourl videourl --conf_path conf.json
     """
     try:
         logs_path = "/Deepspeech/"+os.path.basename(__file__) + ".logs"
@@ -161,8 +166,8 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="Speech to text")
         parser.add_argument('--videoid', type=str,  
                             help='Youtube video Id')
-        parser.add_argument('--storage_type', type=str,  
-                            help='Youtube video Id')
+        parser.add_argument('--videourl', type=str,  
+                            help='video url')
         parser.add_argument('--conf_path', type=str,  
                             help='Path to configuration file')
         args = parser.parse_args()    
@@ -192,11 +197,13 @@ if __name__ == "__main__":
             if blob_storage.isVideoExist(args.videoid):
                 logger.info("Downloading from blob: " + args.videoid)
                 blob_storage.getVideoFilesFromAzureStorage(args.videoid, video_path)
-            else:
+            elif isYoutubeUrl(args.videourl):
                 exit_code, output = download_youtube_video(args.videoid, dest_path)
                 logger.info("Video {} downloaded with the status code {}".format(args.videoid,exit_code))
                 if exit_code != 0:
-                    raise Exception("Error in downloading video {} from youtube".format(args.videoid))                
+                    raise Exception("Error in downloading video {} from youtube".format(args.videoid))
+            else:
+                raise Exception("Cannot download from the url: {},{}".format(args.videoid, args.videourl))
         except Exception as e:
             logger.exception(e)
             raise Exception("Error in blob storage section for video {}".format(args.videoid))                

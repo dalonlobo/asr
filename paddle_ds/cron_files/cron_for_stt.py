@@ -53,12 +53,12 @@ def run_command(command):
     logger.debug("Execution completed")
     return p.returncode, output
 
-def run_asr(videoid, storage_type):
+def run_asr(videoid, videourl):
     """
     Run asr pipeline
     """
     cmd = "sudo nvidia-docker run -v /mnt/dalon/asr/paddle_ds:/Deepspeech dalonlobo/customdeepspeech2 python /Deepspeech/stt_pipeline.py --videoid "+\
-            videoid+" --storage_type "+storage_type+" --conf_path /Deepspeech/cron_files/config.json"
+            videoid+" --videourl "+videourl+" --conf_path /Deepspeech/cron_files/config.json"
     logger.debug('Built cmd: ' + cmd)
     return run_command(cmd)
 
@@ -68,9 +68,6 @@ if __name__ == "__main__":
     Document definition:
         :videoid: Id of the video to be transcribed
         :videourl: This is an optional field
-        :storage_type: This can have 2 values
-            "youtube": For youtube videos
-            "blob": For videos in blob storage
         :status: This field in the document an have following values
              0: Not processed
              1: Processing
@@ -136,7 +133,6 @@ if __name__ == "__main__":
                                                     {'masterKey': MASTER_KEY})) as client:
                 videoJSON = {"videoid": doc["videoid"],
                      "videourl": doc["videourl"],
-                     "storage_type": doc["storage_type"],
                      "status": "1",
                      "priority": doc["priority"],
                      "timestamp": str(datetime.utcnow().isoformat()[:-3]),
@@ -147,7 +143,7 @@ if __name__ == "__main__":
                 updatedb(videoJSON, job_collection_link, HOST, MASTER_KEY)
                 try:
                     logger.info("Running asr on".format(doc["videoid"]))
-                    exit_code, output = run_asr(doc["videoid"], doc["storage_type"])
+                    exit_code, output = run_asr(doc["videoid"], doc["videourl"])
                     logger.info("run_asr exited with the status code {}".format(exit_code))
                     if exit_code != 0:
                         # Update the status to -1
