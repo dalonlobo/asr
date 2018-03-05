@@ -14,7 +14,7 @@ import pydocumentdb.documents as documents
 import pydocumentdb.document_client as document_client
 import pydocumentdb.errors as errors
 import json
-
+import numpy as np
 """
 Following are the definitions of the document fields:
 videoid: Id of the video to be transcribed
@@ -139,6 +139,15 @@ def run_command(command):
                          close_fds=(sys.platform != 'win32'))
     output = p.communicate()
     return p.returncode, output
+
+# to make a request
+for v in x:
+    p=str(np.random.randint(0,3))
+    cmd = '''curl -i -H "Content-Type: application/json" -X POST -d '{"video_id":"'''+v+'''","url":"https://www.youtube.com/watch?v='''+v+'''","priority":"'''+p+'''"}' http://localhost:5000/asr/api/v1.0/make_request'''
+    print(cmd)
+    op = run_command(cmd)    
+    print(op)
+    print("\n\n")
 
 for v in x:
     p =str(np.random.randint(0,3))

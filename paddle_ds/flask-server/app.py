@@ -84,7 +84,11 @@ def make_asr_request():
     app.logger.debug(request.json.get("video_id"))
     video_id = request.json.get("video_id")
     video_url = request.json.get("url", "")
-    priority = request.json.get("url", "0") # Default priority is Low i.e. 0
+    priority = request.json.get("priority", "0") # Default priority is Low i.e. 0
+    if priority == "0" or priority == "1" or priority == "2":
+        priority = str(priority)
+    else:
+        priority = "0"
     resDict = createUpdateDocument(video_id, video_url, priority)
     app.logger.debug(resDict)
     response = {
@@ -131,8 +135,7 @@ if __name__ == '__main__':
                 "id": "Cosmos db document id"
             }
     :Testing using curl:
-        curl -i -H "Content-Type: application/json" -X POST -d '{"video_id":"###"}' http://localhost:5000/asr/api/v1.0/make_request
-    
+        curl -i -H "Content-Type: application/json" -X POST -d '{"video_id":"G_VMsORzbls","url":"https://www.youtube.com/watch?v=G_VMsORzbls","priority":"2"}' http://localhost:5000/asr/api/v1.0/make_request    
     2
     :URL: /asr/api/v1.0/get_status/<int:document_id>
     :Type: GET
