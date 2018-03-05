@@ -180,4 +180,4 @@ if __name__ == '__main__':
         database_link = 'dbs/' + DATABASE_ID
         job_collection_link = database_link + '/colls/' + DS_JOB_COLLECTION_ID
 
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=False)
