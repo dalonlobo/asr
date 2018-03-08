@@ -57,6 +57,8 @@ def run_asr(videoid, videourl):
     """
     Run asr pipeline
     """
+    if not videourl:
+        videourl = "Unknown"
     cmd = "sudo nvidia-docker run -v /mnt/dalon/asr/paddle_ds:/Deepspeech dalonlobo/customdeepspeech2 python /Deepspeech/stt_pipeline.py --videoid "+\
             videoid+" --videourl "+videourl+" --conf_path /Deepspeech/cron_files/config.json"
     logger.debug('Built cmd: ' + cmd)
