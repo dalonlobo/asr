@@ -1,0 +1,10 @@
+{
+"HOST":"https://videokenoffshore.documents.azure.com:443/",
+"MASTER_KEY":"####",
+"DATABASE_ID":"com.videoken.development.jobqueues",
+"DS_JOB_COLLECTION_ID":"DeepSpeechJobQueueProduction",
+"AZURE_CONTAINER_NAME":"com-videoken-deployment",
+"AZURE_DIRECTORY_NAME":"com.videoken/videos/",
+"AZURE_ACCOUNT_NAME":"####",
+"AZURE_ACCOUNT_KEY":"####"
+}
