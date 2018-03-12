@@ -20,6 +20,8 @@ from datetime import datetime
 from flask import Flask, jsonify, request, abort, make_response
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+AM_VERSION = "1.0"
+LM_VERSION = "1.0"
 
 app = Flask(__name__)
 
@@ -44,7 +46,7 @@ def index():
     return "To make request use: /asr/api/v1.0/make_request"
 
 # Insert into the cosmos db
-def createUpdateDocument(videoid, videourl, priority):
+def createUpdateDocument(videoid, videourl, priority, force="False"):
     # Write into the db
     with IDisposable(document_client.DocumentClient(HOST, \
                                                     {'masterKey': MASTER_KEY})) as client:
@@ -52,6 +54,8 @@ def createUpdateDocument(videoid, videourl, priority):
                      "videourl": videourl,
                      "status": "0",
                      "priority": priority,
+                     "lm_version": LM_VERSION,
+                     "am_version": AM_VERSION,
                      "timestamp": str(datetime.utcnow().isoformat()[:-3]),
                      "message": ""}
         query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t  "+\
@@ -59,9 +63,31 @@ def createUpdateDocument(videoid, videourl, priority):
         documentlist = list(client.QueryDocuments(job_collection_link, query))
         if len(documentlist):
             videoJSON["id"] = documentlist[0]["id"]
-            return client.UpsertDocument(job_collection_link, videoJSON)
+            status = documentlist[0].get("status")
+            if force == "True":
+                resp = client.UpsertDocument(job_collection_link, videoJSON)
+                resp["insert_status"] = "Requesting since force flag is set"  
+                return resp
+            if status == "0" or status == "1":
+                resp = {"insert_status": "Not requesting since older request is not processed or in progress"}
+                return resp
+            elif status == "-1":
+                resp = client.UpsertDocument(job_collection_link, videoJSON)
+                resp["insert_status"] = "Requesting since previous request failed"
+                return resp
+            elif status == "2":
+                if documentlist[0].get("lm_version", "") == LM_VERSION and\
+                        documentlist[0].get("am_version", "") == AM_VERSION:
+                    resp = {"insert_status": "Not requesting since AM and LM versions have not changed since previous run, set force flag to force an asr request"}
+                    return resp
+                else:
+                    resp = client.UpsertDocument(job_collection_link, videoJSON)
+                    resp["insert_status"] = "Requesting since lm and am version changed" 
+                    return resp
         else:
-            return client.CreateDocument(job_collection_link, videoJSON) 
+            resp = client.CreateDocument(job_collection_link, videoJSON) 
+            resp["insert_status"] = "Created the document"
+        return resp
 
 # Read from the cosmos db
 def getDocument(document_id):
@@ -69,7 +95,7 @@ def getDocument(document_id):
     with IDisposable(document_client.DocumentClient(HOST, \
                                                     {'masterKey': MASTER_KEY})) as client:
         options = {} 
-        query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.id='"+str(document_id)+"'"
+        query = "SELECT * FROM "+DS_JOB_COLLECTION_ID+" t WHERE t.videoid='"+str(document_id)+"'"
         documentlist = list(client.QueryDocuments(job_collection_link, query, options))
         return documentlist
     
@@ -84,26 +110,28 @@ def make_asr_request():
     app.logger.debug(request.json.get("video_id"))
     video_id = request.json.get("video_id")
     video_url = request.json.get("url", "")
+    force = request.json.get("force", "False")
     priority = request.json.get("priority", "0") # Default priority is Low i.e. 0
     if priority == "0" or priority == "1" or priority == "2":
         priority = str(priority)
     else:
         priority = "0"
-    resDict = createUpdateDocument(video_id, video_url, priority)
+    resDict = createUpdateDocument(video_id, video_url, priority, force)
     app.logger.debug(resDict)
     response = {
-        "id": resDict.get("id")
+        "id": resDict.get("id"),
+        "status": resDict.get("insert_status", "")
     }
     return jsonify(response), 201
 
 
 @app.route('/asr/api/v1.0/get_status', methods=['GET'])
 def get_status():
-    document_id = request.args.get('document_id', default = '', type = str)
+    document_id = request.args.get('videoid', default = '', type = str)
     app.logger.debug("Received get_status request for:")
     app.logger.debug(document_id)
     if not len(document_id):
-        app.logger.error("Document id is not passed")
+        app.logger.error("Video id is not passed")
         abort(400)
     documentlist = getDocument(document_id)
     app.logger.debug(documentlist)
@@ -128,11 +156,13 @@ if __name__ == '__main__':
                 "video_id": "###ABC",
                 "url": "url to download the video", # Could be blob|youtube
                 "priority": "0|1|2, 2-Highest, 1-Medium, 0-Low"
+                "force": "True|False"
             }
     :Response:
         :JSON:
             {
-                "id": "Cosmos db document id"
+                "id": "Cosmos db document id",
+                "status": "Status message"
             }
     :Testing using curl:
         curl -i -H "Content-Type: application/json" -X POST -d '{"video_id":"G_VMsORzbls","url":"https://www.youtube.com/watch?v=G_VMsORzbls","priority":"2"}' http://localhost:5000/asr/api/v1.0/make_request    
@@ -143,7 +173,7 @@ if __name__ == '__main__':
     :Response:
         :JSON with document details:
     :Testing using curl:
-        curl -i http://localhost:5000/asr/api/v1.0/get_status?document_id=#####
+        curl -i http://localhost:5000/asr/api/v1.0/get_status?videoid=#####
     """
     parser = argparse.ArgumentParser(description="Flask server")
     parser.add_argument('--conf_path', type=str,  
