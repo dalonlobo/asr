@@ -17,7 +17,7 @@ df = pd.read_excel("SADHGuru Channel Videos.xlsx")
 
 duration_list = []
 for video_id in df["VideoID"]:
-    api_key="AIzaSyBh_TtEE0SH5g9omsLQtEwn7nxBPBjUj2U"
+    api_key="xxx"
     searchUrl="https://www.googleapis.com/youtube/v3/videos?id="+video_id+"&key="+api_key+"&part=contentDetails"
     response = urllib.urlopen(searchUrl).read()
     print(response)
